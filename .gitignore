@@ -1,0 +1,8 @@
+java/out/
+__pycache__/
+*.pyc
+java/db.properties
+outputs/data/bookings_clean.csv
+outputs/data/bookings_export.csv
+outputs/screenshots/
+outputs/reports/java_demo_output.txt

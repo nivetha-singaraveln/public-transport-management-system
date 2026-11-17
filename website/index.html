@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TN Express · Public Transport Management & Travel Analysis</title>
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--ink:#14213d;--mute:#5f6b84;--line:#e1e6ef;--pri:#0f4c81;--pri2:#1b6bb5;--pri-ink:#fff;--acc:#f2a900;--ok:#1b8a52;--okbg:#e5f5ec;--bad:#c23b2e;--badbg:#fbe9e7;--warn:#9a6a00;--warnbg:#fff4d6;--land:#dfe9f6;--landline:#a9bfdc;--out:#0f4c81;--route:#7a8fb0;--shadow:0 1px 2px rgba(20,33,61,.06),0 6px 20px rgba(20,33,61,.06);--seat:#e9f6ee;--seatline:#b9dcc6;--taken:#e6e8ee;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e131b;--card:#171e29;--ink:#e8edf6;--mute:#98a4bb;--line:#273142;--pri:#4d97e0;--pri2:#74b0ee;--pri-ink:#07121f;--acc:#f5b82e;--ok:#4cc380;--okbg:#14301f;--bad:#ff8173;--badbg:#3a1c19;--warn:#f5c14e;--warnbg:#33290f;--land:#1f2b3d;--landline:#3b4d68;--out:#74b0ee;--route:#6580a8;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--seat:#14301f;--seatline:#265c3c;--taken:#2a3242}}
+:root[data-theme="dark"]{--bg:#0e131b;--card:#171e29;--ink:#e8edf6;--mute:#98a4bb;--line:#273142;--pri:#4d97e0;--pri2:#74b0ee;--pri-ink:#07121f;--acc:#f5b82e;--ok:#4cc380;--okbg:#14301f;--bad:#ff8173;--badbg:#3a1c19;--warn:#f5c14e;--warnbg:#33290f;--land:#1f2b3d;--landline:#3b4d68;--out:#74b0ee;--route:#6580a8;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--seat:#14301f;--seatline:#265c3c;--taken:#2a3242}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Tamil",sans-serif;background-color:var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--pri);z-index:30}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:auto;padding:0 16px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--pri);color:#fff;box-shadow:var(--shadow)}
+.bar{display:flex;align-items:center;gap:14px;min-height:58px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.2px;color:#fff;margin-right:auto}
+.brand small{display:block;font-weight:400;font-size:11px;opacity:.85;letter-spacing:.3px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--acc);display:grid;place-items:center;color:#14213d}
+nav{display:flex;gap:4px;overflow-x:auto;max-width:100%}
+nav button{background:transparent;border:0;color:#fff;opacity:.82;padding:8px 13px;border-radius:8px;cursor:pointer;white-space:nowrap;font-weight:600}
+nav button:hover{opacity:1;background:rgba(255,255,255,.12)}nav button.on{opacity:1;background:rgba(255,255,255,.2)}
+.pill{font-size:12px;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;white-space:nowrap}
+.iconbtn{background:rgba(255,255,255,.16);border:0;color:#fff;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px}
+main{padding-top:16px;padding-bottom:40px}
+.hero{background:linear-gradient(120deg,var(--pri),var(--pri2));color:#fff;border-radius:16px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow)}
+.hero h1{margin:0 0 2px;font-size:24px}.hero p{margin:0;opacity:.9}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.stat{background:rgba(255,255,255,.16);border-radius:10px;padding:8px 14px;min-width:96px}.stat b{display:block;font-size:20px;line-height:1.2}.stat span{font-size:12px;opacity:.9}
+.grid2{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2,.card h3{margin:0 0 10px;font-size:16px}
+.mapcard{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+@media(max-width:900px){.mapcard{position:static}}
+.sel{min-height:30px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:13px;white-space:nowrap}
+.chip.on{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}
+.hint{font-size:13px;color:var(--mute)}
+svg.tn{width:100%;height:auto;display:block;max-height:560px;margin:auto}
+.tn .dist{fill:var(--land);stroke:var(--landline);stroke-width:.6}.tn .dist:hover{fill:var(--landline);fill-opacity:.55}
+.tn .out{fill:none;stroke:var(--out);stroke-width:1.6;stroke-linejoin:round;opacity:.75;pointer-events:none}
+.tn .rt{fill:none;stroke:var(--route);stroke-width:2;stroke-linecap:round;opacity:.65;cursor:default}
+.tn .rt.dim{opacity:.12}.tn .rt.sel{stroke:var(--acc);stroke-width:4;opacity:1;stroke-dasharray:7 5;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@media(prefers-reduced-motion:reduce){.tn .rt.sel{animation:none}}
+.tn .city{cursor:pointer}.tn .city circle{fill:var(--card);stroke:var(--pri);stroke-width:3}
+.tn .city.from circle{fill:var(--ok);stroke:var(--ok)}.tn .city.to circle{fill:var(--acc);stroke:var(--acc)}.tn .city.dim{opacity:.35}
+.tn .city text{font-size:12px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:3px;stroke-linejoin:round}
+.tn .city text.ta{font-size:9px;font-weight:500;fill:var(--mute)}
+.tn.dm .city{cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.f{flex:1;min-width:130px}label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:4px}
+select,input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--pri2);outline-offset:1px}
+.btn{background:var(--pri);color:var(--pri-ink);border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:var(--bad);color:#fff}.btn.sm{padding:7px 12px;font-size:13px}
+.link{background:none;border:0;color:var(--pri);cursor:pointer;font-weight:600;padding:4px 0;margin-bottom:8px}
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}
+.day{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 12px;text-align:center;cursor:pointer;min-width:62px}
+.day b{display:block;font-size:15px}.day span{font-size:11px;color:var(--mute)}.day.on{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}.day.on span{color:inherit;opacity:.85}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.trip{display:grid;grid-template-columns:1fr auto;gap:8px 14px;padding:14px 0;border-top:1px solid var(--line);align-items:center}
+.trip:first-child{border-top:0}.tt{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700}.tt small{font-size:12px;font-weight:500;color:var(--mute)}
+.tt .ln{flex:0 1 54px;height:2px;background:var(--line);position:relative}.tt .ln::after{content:"";position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:7px solid var(--line)}
+.meta{color:var(--mute);font-size:13px}.price{font-size:20px;font-weight:800;text-align:right}.price small{display:block;font-size:12px;font-weight:500;color:var(--mute)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--line);color:var(--mute);margin-right:6px}
+.meter{height:6px;border-radius:4px;background:var(--taken);overflow:hidden;margin-top:6px;max-width:240px}.meter i{display:block;height:100%;background:var(--ok)}.meter i.hi{background:var(--acc)}.meter i.full{background:var(--bad)}
+.empty{text-align:center;padding:30px 10px;color:var(--mute)}.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;align-items:start}@media(max-width:760px){.split{grid-template-columns:1fr}}
+.bus{border:2px solid var(--line);border-radius:22px 22px 12px 12px;padding:12px;max-width:340px;margin:auto;background:var(--bg)}
+.front{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);border-bottom:2px dashed var(--line);padding:2px 6px 10px;margin-bottom:10px}
+.srow{display:flex;gap:6px;margin-bottom:6px;justify-content:center}.aisle{width:26px;flex:none}
+.seat{width:44px;height:40px;border-radius:9px 9px 6px 6px;border:1.5px solid var(--seatline);background:var(--seat);cursor:pointer;font-weight:700;font-size:13px;padding:0}
+.seat.t{background:var(--taken);border-color:var(--line);color:var(--mute);cursor:not-allowed;text-decoration:line-through}.seat.s{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}.seat.sp{visibility:hidden}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mute);justify-content:center;margin-bottom:10px;flex-wrap:wrap}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--seatline);background:var(--seat)}.legend i.t{background:var(--taken);border-color:var(--line)}.legend i.s{background:var(--pri);border-color:var(--pri)}
+.err{color:var(--bad);font-size:12px;min-height:16px;margin-top:3px}
+.sum{background:var(--bg);border-radius:10px;padding:12px;margin:12px 0;font-size:14px}.sum div{display:flex;justify-content:space-between;padding:2px 0}.sum .tot{font-weight:800;font-size:17px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.ticket{display:grid;grid-template-columns:1fr auto;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+.ticket .main{padding:14px 16px}.ticket .stub{border-left:2px dashed var(--line);padding:14px;text-align:center;min-width:130px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:var(--bg)}
+.ticket h3{margin:0;font-size:19px}.ticket .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:1px}
+.ticket .seatno{font-size:30px;font-weight:800;line-height:1;color:var(--pri)}
+.ticket svg.bc{width:110px;height:34px}.ticket svg.bc rect{fill:var(--ink)}
+.st{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px}.st.ok{background:var(--okbg);color:var(--ok)}.st.bad{background:var(--badbg);color:var(--bad)}.st.warn{background:var(--warnbg);color:var(--warn)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:520px){.ticket{grid-template-columns:1fr}.ticket .stub{border-left:0;border-top:2px dashed var(--line);flex-direction:row;justify-content:space-between;align-items:center}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}.kpi span{font-size:12px;color:var(--mute);font-weight:600}.kpi b{display:block;font-size:24px;margin:2px 0}.kpi em{font-style:normal;font-size:12px;color:var(--mute)}
+.dgrid{display:grid;grid-template-columns:minmax(300px,440px) 1fr;gap:14px;align-items:start}@media(max-width:900px){.dgrid{grid-template-columns:1fr}}
+.bar2{display:grid;grid-template-columns:minmax(110px,215px) 1fr auto;gap:10px;align-items:center;margin:7px 0;font-size:13px}.bar2 .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar2 .tr{background:var(--bg);border-radius:6px;height:14px;overflow:hidden}.bar2 .tr i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--pri2));border-radius:6px}.bar2 em{font-style:normal;color:var(--mute);min-width:70px;text-align:right}
+.cols{display:flex;gap:8px;align-items:end;height:130px;margin-top:6px}.col{flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:4px;height:100%;font-size:11px;color:var(--mute)}.col i{display:block;width:100%;max-width:38px;background:var(--pri2);border-radius:6px 6px 0 0;min-height:2px}.col b{color:var(--ink);font-size:12px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:600;font-size:12px}
+.banner{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;font-weight:500}
+.tabs h2{margin:0 0 12px;font-size:20px}
+#toasts{position:fixed;right:14px;top:calc(env(safe-area-inset-top,0px) + 70px);display:flex;flex-direction:column;gap:8px;z-index:50;max-width:min(360px,calc(100vw - 28px))}
+.toast{padding:11px 14px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--shadow);background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pri)}.toast.ok{border-left-color:var(--ok)}.toast.err{border-left-color:var(--bad)}
+#modal{position:fixed;inset:0;background:rgba(10,16,28,.55);display:none;place-items:center;z-index:60;padding:16px}#modal.on{display:grid}
+.mbox{background:var(--card);border-radius:16px;padding:20px;max-width:420px;width:100%;box-shadow:var(--shadow)}.mbox h3{margin:0 0 8px}.mbox .acts{justify-content:flex-end;margin-top:16px}
+footer{text-align:center;color:var(--mute);font-size:12px;padding:10px 16px 30px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap bar">
+ <div class="brand"><div class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="3"/><path d="M3 11h18M7 17v3M17 17v3"/><circle cx="7.5" cy="14" r=".6"/><circle cx="16.5" cy="14" r=".6"/></svg></div><div>TN Express<small>தமிழ்நாடு பேருந்து சேவை · Public Transport Management</small></div></div>
+ <nav id="nav" aria-label="Sections"></nav>
+ <span class="pill" id="modePill">Connecting…</span>
+ <button class="iconbtn" id="themeBtn" title="Switch light / dark" aria-label="Switch light or dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.4A6 6 0 0 1 12 3z"/></svg></button>
+</div></header>
+
+<main class="wrap">
+<div id="banner"></div>
+
+<section id="tab-book">
+ <div class="hero"><h1>Where would you like to go?</h1><p>Tap two cities on the Tamil Nadu map, or use the dropdowns, then pick a bus and seat.</p>
+  <div class="stats" id="stats"></div></div>
+ <div class="grid2">
+  <aside class="card mapcard"><h2>Tamil Nadu bus network</h2>
+   <div class="sel" id="sel"></div><div id="map1"></div>
+   <p class="hint" style="margin:8px 0 0">Green = departure city, amber = destination. Lines are direct bus services.</p></aside>
+  <div>
+   <div id="bk1">
+    <div class="card"><div class="row">
+      <div class="f"><label for="fFrom">From</label><select id="fFrom"></select></div>
+      <button class="btn ghost" id="swap" title="Swap cities" aria-label="Swap cities">⇄</button>
+      <div class="f"><label for="fTo">To</label><select id="fTo"></select></div></div>
+     <label style="margin-top:12px">Travel day</label><div class="days" id="days"></div>
+     <div class="row" style="margin-top:6px"><div class="chips" id="chips" style="margin:0;flex:1"></div>
+      <div style="width:150px"><label for="sort">Sort by</label><select id="sort"><option value="time">Departure time</option><option value="fare">Lowest fare</option><option value="seats">Most seats free</option></select></div></div></div>
+    <div class="card" id="results"></div>
+   </div>
+   <div id="bk2" class="hide"></div>
+   <div id="bk3" class="hide"></div>
+  </div>
+ </div>
+</section>
+
+<section id="tab-trips" class="tabs hide">
+ <h2>My trips</h2>
+ <div class="card"><div class="row">
+  <div class="f"><label for="mPhone">Mobile number used for booking</label><input id="mPhone" inputmode="numeric" maxlength="10" placeholder="10-digit mobile"></div>
+  <div class="f"><label for="mCode">Ticket code (optional)</label><input id="mCode" placeholder="e.g. TKT1A2B3C"></div>
+  <button class="btn" id="mFind">Find my tickets</button></div>
+  <p class="hint" style="margin:10px 0 0">Refund policy: 90% if cancelled 24 h or more before departure, 50% between 2 and 24 h, nothing within 2 h.</p></div>
+ <div id="myList"></div>
+</section>
+
+<section id="tab-dash" class="tabs hide"><h2>Operations dashboard</h2><div id="dash"></div></section>
+
+<section id="tab-admin" class="tabs hide">
+ <h2>Administration</h2>
+ <div class="dgrid">
+  <div>
+   <div class="card"><h3>Add a bus</h3><div class="row"><div class="f"><label>Bus number</label><input id="aBusNo" placeholder="TN58-XX-1234"></div>
+    <div class="f" style="max-width:120px"><label>Seats (1–80)</label><input id="aBusCap" type="number" min="1" max="80"></div>
+    <div class="f"><label>Type</label><select id="aBusType"></select></div><button class="btn" id="aBusBtn">Add bus</button></div></div>
+   <div class="card"><h3>Add a route</h3><div class="row"><div class="f"><label>City A</label><select id="aRa"></select></div><div class="f"><label>City B</label><select id="aRb"></select></div>
+    <div class="f" style="max-width:130px"><label>Distance (km)</label><input id="aKm" type="number" min="1"></div><button class="btn" id="aRouteBtn">Add route</button></div>
+    <p class="hint" style="margin:8px 0 0">A new route gets daily services in both directions automatically and appears on the map.</p></div>
+   <div class="card"><h3>Add a special schedule</h3><div class="row"><div class="f"><label>Bus</label><select id="aSBus"></select></div><div class="f"><label>Route &amp; direction</label><select id="aSRoute"></select></div></div>
+    <div class="row" style="margin-top:10px"><div class="f"><label>Date</label><input id="aSDate" type="date"></div><div class="f"><label>Departure</label><input id="aSTime" type="time"></div><div class="f"><label>Fare (Rs.)</label><input id="aSFare" type="number" min="1"></div><button class="btn" id="aSchBtn">Add schedule</button></div></div>
+  </div>
+  <div>
+   <div class="card"><h3>Demo data</h3><p class="hint" style="margin-top:0">Fill the dashboard with realistic sample bookings for a presentation, and remove them again in one click. Real bookings are never touched.</p>
+    <div class="acts"><button class="btn" id="seedBtn">Add sample bookings</button><button class="btn ghost" id="clearBtn">Remove sample bookings</button></div></div>
+   <div class="card"><h3>Export</h3><p class="hint" style="margin-top:0">Download every ticket as a CSV file for analysis in Python or Excel.</p><div class="acts"><button class="btn ghost" id="csvBtn">Download tickets (CSV)</button></div></div>
+   <div class="card"><h3>Network</h3><div id="netInfo" class="hint"></div></div>
+  </div>
+ </div>
+</section>
+</main>
+<footer>TN Express · Scenario 10 · Java, DBMS and Python project · Distances are approximate road kilometres</footer>
+<div id="toasts" aria-live="polite"></div><div id="modal" role="dialog" aria-modal="true"></div>
+
+<script>
+"use strict";
+const MAP={"w":473,"h":638,"districts":[["Thiruvallur","M456.7 56.8L445.8 58.7L444.2 70.1L432.7 68.8L432.4 71.0L428.4 70.6L422.9 67.6L416.6 69.1L417.2 71.8L411.5 79.0L403.9 76.9L400.2 66.5L395.7 67.1L394.6 54.1L390.0 55.0L384.8 50.5L383.0 56.5L366.6 57.2L365.9 60.8L363.2 62.3L361.3 57.5L357.7 61.1L358.0 63.8L350.4 66.0L344.8 59.1L347.6 60.2L353.7 58.2L352.7 54.4L356.7 51.2L361.0 51.6L363.5 48.5L363.4 46.1L359.6 45.6L357.4 35.8L372.7 34.9L373.0 42.3L376.7 43.8L380.2 40.5L387.4 41.4L388.8 45.4L392.6 48.5L394.1 46.3L397.2 49.5L401.0 45.7L394.4 41.9L398.0 37.6L400.6 39.9L403.4 37.1L416.0 33.4L419.0 30.3L416.9 25.2L420.6 24.7L420.5 20.2L424.4 19.2L426.7 12.4L432.0 13.8L432.2 18.0L450.2 19.9L452.6 9.8L459.4 22.9L461.7 37.5L456.7 56.8Z"],["Chennai","M437.6 68.9L444.2 70.1L445.8 58.7L456.7 56.8L451.0 88.8L443.7 87.7L444.3 81.7L442.4 76.5L438.7 74.7L437.6 68.9Z"],["Krishnagiri","M248.9 114.6L249.2 130.1L253.0 134.5L251.5 140.7L266.1 141.4L271.4 145.9L269.7 154.9L274.8 155.9L277.4 160.0L273.2 165.0L260.9 164.7L258.2 169.2L254.9 168.1L255.5 165.5L246.6 161.9L246.0 159.2L242.6 159.5L240.3 155.3L233.0 155.3L228.5 145.7L226.1 147.9L223.1 147.4L219.2 143.3L217.6 139.8L219.0 136.5L216.3 133.8L214.4 134.8L208.9 131.5L206.5 133.3L204.8 128.5L201.7 128.0L198.4 130.4L194.9 129.8L200.4 138.9L197.9 147.1L188.9 147.8L188.4 156.0L183.1 158.5L180.9 168.2L166.7 162.6L150.6 163.0L145.5 161.3L147.3 153.4L151.5 153.6L160.9 144.4L162.5 133.5L160.4 131.6L161.2 128.4L158.1 127.2L157.3 120.6L160.2 114.4L159.4 110.1L166.1 108.2L168.2 110.8L175.0 109.3L180.9 99.9L181.5 89.4L185.5 87.3L191.5 87.4L195.8 85.0L196.8 87.1L194.4 90.9L197.0 92.6L202.4 92.8L206.9 89.3L211.9 90.7L218.3 97.2L228.9 99.6L229.9 106.1L233.9 106.2L236.2 109.6L245.3 114.8L248.9 114.6Z"],["Tiruvannamalai","M273.2 165.0L277.4 160.0L274.8 155.9L281.6 150.7L283.8 142.9L288.1 137.6L287.0 135.2L297.9 113.9L303.8 107.8L310.4 109.6L314.3 106.1L316.1 107.2L320.7 101.2L328.1 99.4L336.2 101.3L336.5 96.9L341.3 94.3L346.1 101.1L357.0 107.6L352.8 109.5L355.7 114.4L363.2 109.6L364.7 106.4L363.8 90.2L365.5 86.9L375.1 89.2L383.9 93.6L384.6 98.3L390.4 97.9L395.5 101.5L395.1 107.1L384.6 109.7L382.9 114.1L386.8 118.3L393.2 119.0L392.1 123.3L396.7 127.1L396.0 133.6L387.2 140.7L384.0 146.2L371.7 143.3L369.3 146.1L363.2 142.9L362.8 140.5L357.2 136.0L340.3 134.9L338.5 138.7L340.9 141.9L339.4 143.5L341.0 148.7L345.4 149.2L340.5 154.1L339.2 162.7L336.7 166.2L344.2 170.8L339.4 177.9L335.6 177.0L332.6 181.4L329.7 179.8L327.4 182.7L322.2 181.3L324.4 177.1L322.9 175.7L319.3 180.7L317.0 177.6L309.1 177.1L304.0 183.2L292.0 182.6L282.5 186.6L280.3 185.6L283.8 170.5L276.8 173.3L272.9 169.7L274.7 166.4L273.2 165.0Z"],["Dharmapuri","M175.7 167.4L177.2 165.8L180.9 168.2L183.1 158.5L188.4 156.0L188.9 147.8L197.9 147.1L200.4 138.9L194.9 129.8L204.8 128.5L206.5 133.3L208.9 131.5L214.4 134.8L216.3 133.8L219.0 136.5L217.6 139.8L219.2 143.3L223.1 147.4L226.1 147.9L228.5 145.7L233.0 155.3L240.3 155.3L242.6 159.5L246.0 159.2L246.6 161.9L255.5 165.5L254.9 168.1L258.2 169.2L260.9 164.7L267.3 166.1L270.8 164.4L274.7 166.4L272.9 169.7L276.8 173.3L283.8 170.5L280.3 185.6L282.5 186.6L281.1 191.6L283.2 193.8L281.4 196.2L276.2 196.5L269.1 204.7L263.7 206.4L256.5 205.2L247.9 199.0L242.1 208.1L239.7 207.4L244.0 198.2L239.0 195.4L238.7 192.4L231.8 191.5L229.4 187.1L207.8 191.9L201.2 196.2L177.4 194.9L174.8 191.6L167.9 190.2L170.1 183.0L178.8 171.5L175.7 167.4Z"],["Salem","M167.9 190.2L174.8 191.6L177.4 194.9L201.2 196.2L207.8 191.9L229.4 187.1L231.8 191.5L238.7 192.4L239.0 195.4L244.0 198.2L239.7 207.4L242.1 208.1L247.9 199.0L256.5 205.2L263.7 206.4L269.1 204.7L272.5 199.4L279.8 201.4L279.7 206.7L274.3 210.8L275.0 222.0L276.1 224.2L280.6 219.3L289.4 218.0L292.0 219.7L290.0 228.1L294.6 232.2L293.4 234.0L296.3 238.2L292.7 239.9L290.4 246.0L293.7 247.6L291.5 253.7L285.1 246.4L280.5 245.7L275.2 249.5L276.5 254.9L274.1 258.5L264.4 261.0L264.4 256.6L259.6 252.3L252.8 252.0L251.1 243.5L255.6 238.5L253.2 229.9L243.7 232.1L239.8 237.2L236.9 230.9L230.3 234.9L226.6 233.6L221.2 236.5L212.3 235.4L211.8 238.3L208.3 239.1L201.1 237.3L200.4 244.3L194.6 246.2L192.4 249.7L187.3 250.3L183.8 246.5L174.0 247.0L170.2 244.8L173.9 239.7L174.5 229.2L177.3 224.0L175.9 222.4L169.3 223.7L173.0 207.7L166.8 204.5L166.3 198.4L168.9 198.5L167.9 190.2Z"],["Erode","M167.9 190.2L168.9 198.5L166.3 198.4L166.8 204.5L173.0 207.7L169.3 223.7L175.9 222.4L177.3 224.0L174.5 229.2L173.9 239.7L168.6 249.4L182.5 267.0L188.8 269.9L188.3 275.6L190.8 279.3L191.6 287.9L196.1 288.9L190.4 294.1L183.5 288.9L179.0 290.3L161.3 282.6L148.5 284.8L147.1 276.7L149.7 275.8L148.5 271.5L144.5 267.8L145.8 263.0L130.3 261.3L131.6 265.8L125.0 264.1L117.5 257.4L111.9 261.3L106.2 254.4L98.5 251.7L95.0 255.5L89.5 253.7L91.7 247.5L94.9 246.2L92.6 242.9L94.9 238.1L89.2 232.8L77.4 232.1L75.3 225.1L83.4 207.7L90.2 209.8L94.9 205.5L102.6 213.9L105.8 213.7L105.7 210.1L119.8 207.8L121.0 205.7L125.8 206.2L130.4 210.4L137.0 208.7L140.6 210.9L147.7 191.4L167.9 190.2Z"],["Nilgiris","M76.6 230.2L77.4 232.1L89.2 232.8L94.9 238.1L92.6 242.9L94.9 246.2L91.7 247.5L91.4 251.8L86.6 256.6L82.7 257.5L81.5 255.8L77.0 258.7L78.3 262.4L76.1 264.6L71.3 264.1L52.7 275.0L42.2 276.0L38.4 273.1L32.9 273.8L33.4 270.0L43.2 263.6L43.7 256.6L34.1 253.2L24.1 245.7L19.4 245.9L12.6 242.9L9.2 233.2L14.2 229.5L16.7 232.8L25.1 229.3L26.2 226.3L30.5 225.8L39.8 217.8L42.8 219.6L46.2 227.6L76.6 230.2Z"],["Namakkal","M170.2 244.8L174.0 247.0L183.8 246.5L187.3 250.3L192.4 249.7L194.6 246.2L200.4 244.3L201.1 237.3L208.3 239.1L211.8 238.3L212.3 235.4L221.2 236.5L226.6 233.6L230.3 234.9L236.9 230.9L239.8 237.2L243.7 232.1L253.2 229.9L255.6 238.5L251.1 243.5L252.8 252.0L257.0 251.1L252.7 259.6L254.3 260.5L250.0 273.1L245.5 275.8L245.5 280.9L241.6 281.8L242.1 289.0L239.2 290.3L228.8 286.2L229.4 289.6L223.7 289.0L224.9 294.3L221.7 295.3L214.7 288.3L202.5 286.0L197.6 289.5L191.6 287.9L190.8 279.3L188.3 275.6L188.8 269.9L182.5 267.0L168.6 249.4L170.2 244.8Z"],["Perambalur","M275.7 259.4L275.2 249.5L280.5 245.7L285.1 246.4L291.5 253.7L293.7 247.6L290.4 246.0L292.7 239.9L296.3 238.2L300.0 239.9L309.3 251.4L332.1 254.4L330.8 258.9L327.9 259.6L325.5 266.5L327.0 268.9L319.6 282.3L321.1 284.5L314.2 290.2L310.7 286.2L302.1 285.6L292.3 287.9L292.7 284.3L287.2 283.3L284.4 285.0L285.2 288.3L280.7 289.1L277.8 275.0L280.4 275.4L284.8 263.9L284.2 260.6L275.7 259.4Z"],["Coimbatore","M89.5 253.7L95.0 255.5L98.5 251.7L106.2 254.4L109.7 259.1L110.1 262.5L106.7 264.3L111.6 266.8L111.2 278.0L122.4 284.0L112.1 289.3L113.2 292.8L110.5 297.1L113.2 305.0L116.7 307.7L120.8 307.5L122.1 313.5L125.9 317.7L121.5 321.8L115.1 318.9L111.2 319.9L108.3 324.8L110.3 335.9L113.5 336.7L110.9 343.4L102.4 344.7L102.1 352.5L100.0 355.3L101.6 356.9L98.1 361.0L103.0 366.4L101.9 371.1L103.5 373.6L99.2 379.2L91.8 383.9L83.6 382.4L74.8 374.8L76.8 367.6L73.3 361.4L75.8 342.1L73.4 341.3L73.1 337.6L80.6 337.2L78.8 332.2L82.9 323.3L82.6 318.3L79.2 318.2L74.9 311.3L56.0 304.6L62.3 292.3L65.6 290.5L65.8 281.7L61.1 280.9L60.0 278.1L64.4 272.6L61.1 269.9L71.3 264.1L76.1 264.6L78.3 262.4L77.0 258.7L81.5 255.8L82.7 257.5L86.6 256.6L89.5 253.7Z"],["Tiruchirappalli","M257.0 251.1L264.4 256.6L264.4 261.0L274.1 258.5L276.5 254.9L275.7 259.4L284.2 260.6L282.0 272.8L280.4 275.4L277.8 275.0L280.7 289.1L285.2 288.3L284.4 285.0L287.2 283.3L292.7 284.3L292.3 287.9L302.1 285.6L310.7 286.2L314.2 290.2L314.9 295.7L312.0 296.7L311.2 300.1L307.2 299.8L313.8 305.5L314.0 308.7L307.4 309.2L297.3 314.4L299.1 316.4L299.5 331.7L293.8 331.0L290.5 336.0L287.0 335.6L284.5 328.8L279.3 326.5L279.8 331.3L276.8 333.5L276.0 329.8L272.5 330.0L268.7 335.0L265.7 334.8L264.1 331.9L261.0 333.3L261.5 338.3L256.6 337.3L254.1 340.3L255.1 348.2L260.7 354.7L264.0 351.2L268.4 355.7L267.7 358.8L261.0 359.9L259.1 366.7L253.0 362.9L251.6 368.1L249.2 368.1L245.2 374.1L240.2 375.1L240.7 372.4L234.2 367.1L238.2 359.6L226.2 355.7L224.6 352.7L225.5 347.5L230.3 346.7L232.4 344.0L235.7 330.2L245.1 327.5L248.3 333.3L265.9 325.9L267.2 313.6L247.8 301.2L226.3 301.4L221.7 295.3L224.9 294.3L223.7 289.0L229.4 289.6L228.8 286.2L239.2 290.3L242.1 289.0L241.6 281.8L245.5 280.9L245.5 275.8L250.0 273.1L254.3 260.5L252.7 259.6L257.0 251.1Z"],["Ariyalur","M314.2 290.2L321.1 284.5L319.6 282.3L327.0 268.9L325.5 266.5L327.9 259.6L330.8 258.9L332.1 254.4L338.3 252.9L346.2 254.0L345.7 250.6L353.9 249.9L355.9 251.0L356.4 255.7L368.4 261.7L368.7 274.0L357.4 289.3L345.6 295.2L338.0 302.8L321.9 305.5L317.1 309.5L314.0 308.7L313.8 305.5L307.2 299.8L311.2 300.1L312.0 296.7L314.9 295.7L314.2 290.2Z"],["Tiruppur","M109.7 259.1L111.9 261.3L117.5 257.4L125.0 264.1L131.6 265.8L130.3 261.3L145.8 263.0L144.5 267.8L148.5 271.5L149.7 275.8L147.1 276.7L148.5 284.8L161.3 282.6L179.0 290.3L180.6 293.1L179.5 296.9L176.1 298.9L178.2 301.0L177.2 307.6L185.2 315.0L189.3 314.7L190.1 320.4L189.3 322.3L181.4 318.6L178.3 322.8L184.5 324.9L184.2 328.6L182.4 332.5L176.4 334.0L173.6 338.2L170.4 334.6L170.0 326.4L166.6 328.6L165.7 333.4L158.0 332.2L153.2 340.5L150.3 340.2L146.6 336.0L139.4 338.7L134.1 347.2L135.9 358.4L130.1 357.7L128.7 362.1L128.3 369.0L132.3 378.0L125.2 382.8L122.6 382.4L118.6 373.5L119.4 369.3L112.9 368.6L103.5 373.6L101.9 371.1L103.0 366.4L98.1 361.0L101.6 356.9L100.0 355.3L102.1 352.5L102.4 344.7L110.9 343.4L113.5 336.7L110.3 335.9L109.0 332.6L108.3 324.8L111.2 319.9L115.1 318.9L121.5 321.8L125.9 317.7L122.1 313.5L120.8 307.5L116.7 307.7L113.2 305.0L110.5 297.1L113.2 292.8L112.1 289.3L122.4 284.0L111.2 278.0L111.6 266.8L106.7 264.3L110.1 262.5L109.7 259.1Z"],["Thanjavur","M299.6 329.8L299.1 316.4L297.3 314.4L307.4 309.2L317.1 309.5L321.9 305.5L338.0 302.8L345.6 295.2L357.4 289.3L364.0 279.9L371.5 276.2L374.4 282.5L369.8 292.1L372.0 295.6L367.0 311.4L363.7 312.0L345.6 303.8L343.5 308.1L346.7 316.0L352.4 319.9L351.4 325.9L347.4 328.5L348.5 334.8L352.9 336.6L351.7 342.4L357.5 344.1L365.1 351.5L366.7 354.0L365.5 360.2L363.5 360.2L365.9 367.1L368.7 367.5L366.0 369.5L365.5 373.4L355.3 373.4L346.6 379.1L338.5 393.5L335.8 391.1L330.2 390.9L331.2 386.9L326.3 382.6L328.1 379.1L326.9 371.0L330.3 369.7L328.1 361.3L331.0 355.7L329.0 351.4L333.8 348.5L333.0 343.2L329.1 342.9L327.8 337.7L320.8 336.2L320.8 333.7L316.7 332.5L312.8 327.9L312.1 332.7L304.6 333.7L299.6 329.8Z"],["Karur","M179.0 290.3L183.5 288.9L190.4 294.1L202.5 286.0L206.5 286.6L214.7 288.3L226.3 301.4L247.8 301.2L267.2 313.6L265.9 325.9L248.3 333.3L245.1 327.5L235.7 330.2L232.4 344.0L230.3 346.7L225.5 347.5L218.8 345.8L218.5 341.9L221.7 340.0L219.6 336.0L220.2 325.9L223.4 317.9L215.1 318.6L214.3 322.9L197.6 322.8L195.9 325.5L203.3 325.6L205.2 328.2L204.2 333.1L200.2 333.5L199.1 337.1L190.6 336.1L184.9 337.9L182.4 332.5L184.5 324.9L178.3 322.8L181.4 318.6L189.3 322.3L190.1 320.4L189.3 314.7L185.2 315.0L177.2 307.6L178.2 301.0L176.1 298.9L179.5 296.9L180.6 293.1L179.0 290.3Z"],["Thiruvarur","M372.5 368.6L365.9 367.1L363.5 360.2L365.5 360.2L366.7 354.0L365.1 351.5L357.5 344.1L351.7 342.4L352.9 336.6L348.5 334.8L347.4 328.5L351.4 325.9L352.4 319.9L346.7 316.0L343.5 308.1L345.6 303.8L363.7 312.0L367.0 311.4L370.3 300.2L381.9 300.0L384.7 295.5L390.6 295.1L395.9 297.2L397.1 301.2L392.9 300.2L393.2 304.7L387.1 306.4L385.3 309.6L385.6 315.0L393.7 316.0L386.9 335.9L387.0 344.5L392.1 349.9L389.5 358.4L382.9 358.9L383.3 366.4L375.2 365.6L372.5 368.6Z"],["Dindigul","M225.5 347.5L224.6 352.7L226.2 355.7L238.2 359.6L234.2 367.1L240.7 372.4L239.7 383.2L233.5 388.2L234.4 394.3L231.9 399.1L226.9 400.3L220.7 396.7L221.3 391.5L219.3 388.4L205.7 388.1L196.2 396.1L194.1 400.3L182.0 401.3L171.9 405.9L170.8 397.3L173.2 391.6L170.2 385.7L166.4 387.6L162.3 385.2L144.6 394.2L133.1 391.9L123.0 395.1L125.2 382.8L132.3 378.0L128.3 369.0L128.7 362.1L130.1 357.7L135.9 358.4L134.1 347.2L139.4 338.7L146.6 336.0L150.3 340.2L153.2 340.5L158.0 332.2L165.7 333.4L166.6 328.6L170.0 326.4L170.4 334.6L173.6 338.2L180.3 332.0L182.4 332.5L184.9 337.9L190.6 336.1L199.1 337.1L200.2 333.5L204.2 333.1L205.2 328.2L203.3 325.6L195.9 325.5L197.6 322.8L214.3 322.9L215.1 318.6L223.4 317.9L220.2 325.9L219.6 336.0L221.7 340.0L218.5 341.9L218.8 345.8L225.5 347.5Z"],["Madurai","M240.2 375.1L245.2 374.1L248.9 384.9L246.9 389.3L247.7 393.3L251.6 394.0L253.9 397.4L253.4 402.2L250.6 402.8L253.7 406.8L253.7 412.3L238.4 417.0L237.6 423.9L220.2 422.8L217.3 425.1L218.3 429.9L221.7 428.1L224.8 430.5L219.6 431.8L218.6 435.5L215.3 432.7L214.6 436.2L210.3 437.8L213.1 444.4L210.1 446.6L208.0 444.8L200.8 450.3L198.4 448.1L178.9 449.0L177.0 444.4L172.2 442.4L167.0 444.9L164.3 441.9L160.1 442.9L158.0 446.1L152.6 446.9L145.8 457.7L144.6 456.0L159.6 433.4L162.1 428.5L161.6 424.7L168.2 416.3L171.9 405.9L182.0 401.3L194.1 400.3L196.2 396.1L205.7 388.1L219.3 388.4L221.3 391.5L220.7 396.7L226.9 400.3L231.9 399.1L234.4 394.3L233.5 388.2L239.7 383.2L240.2 375.1Z"],["Theni","M123.0 395.1L133.1 391.9L144.6 394.2L162.3 385.2L166.4 387.6L170.2 385.7L173.2 391.6L170.8 397.3L171.9 405.9L168.2 416.3L161.6 424.7L162.1 428.5L144.6 456.0L145.8 457.7L135.8 462.6L126.9 453.7L123.2 456.7L112.0 451.9L120.6 431.4L118.5 428.8L119.5 424.5L117.7 423.9L117.5 419.4L123.5 411.4L122.3 405.1L115.6 396.8L120.4 394.0L123.0 395.1Z"],["Virudhunagar","M145.8 457.7L152.6 446.9L158.0 446.1L160.1 442.9L164.3 441.9L167.0 444.9L172.2 442.4L177.0 444.4L178.9 449.0L198.4 448.1L200.8 450.3L208.0 444.8L210.1 446.6L213.1 444.4L210.3 437.8L214.6 436.2L215.3 432.7L218.6 435.5L223.8 435.9L226.4 433.3L234.0 437.9L233.6 443.9L235.1 445.1L237.8 439.8L243.0 447.5L246.9 448.5L247.5 452.3L250.8 452.6L244.6 456.6L244.8 463.9L239.7 465.4L236.7 471.3L227.6 470.6L230.3 478.1L236.9 477.8L237.1 482.4L243.4 481.7L239.0 489.7L226.8 486.6L222.0 479.5L209.8 480.2L204.7 486.3L204.5 490.8L198.8 493.0L194.5 498.2L190.1 497.5L190.4 493.3L180.4 492.6L171.8 488.2L164.5 488.5L158.5 486.2L158.6 482.3L151.9 478.7L149.3 483.6L142.1 481.1L143.1 479.3L139.7 476.1L136.2 476.8L130.8 473.7L133.8 469.3L136.7 469.3L137.8 462.0L145.8 457.7Z"],["Thoothukkudi","M186.7 493.5L190.4 493.3L190.1 497.5L194.5 498.2L198.8 493.0L204.5 490.8L204.7 486.3L209.8 480.2L222.0 479.5L226.8 486.6L234.4 489.0L233.1 498.2L236.1 497.8L233.8 504.2L245.9 510.3L228.4 523.9L222.4 533.8L221.2 542.6L225.0 548.6L218.8 556.6L219.3 576.6L210.5 586.6L210.7 591.0L191.4 596.5L188.0 594.6L183.2 569.7L179.5 567.5L180.0 563.5L183.6 562.1L183.8 545.6L187.1 542.7L181.6 534.3L177.2 533.0L177.1 528.9L170.0 528.9L169.5 525.5L173.8 522.7L169.2 519.2L171.8 515.1L170.7 513.7L175.3 512.1L175.0 509.1L169.0 509.3L167.7 505.3L174.5 499.8L175.4 502.6L185.7 502.0L188.1 498.1L186.7 493.5Z"],["Kanyakumari","M158.4 617.1L154.7 624.2L129.9 618.5L120.9 613.7L104.3 600.1L112.8 593.6L111.1 591.6L116.9 580.1L124.8 571.6L123.1 568.0L134.8 574.7L141.8 576.0L142.4 579.5L145.5 581.8L145.5 587.9L152.2 591.6L155.5 601.9L153.1 606.9L152.9 614.7L158.4 617.1Z"],["Viluppuram","M332.6 181.4L335.6 177.0L339.4 177.9L342.2 175.6L344.2 170.8L336.7 166.2L339.2 162.7L340.5 154.1L345.4 149.2L341.0 148.7L339.4 143.5L340.9 141.9L338.5 138.7L340.3 134.9L357.2 136.0L362.8 140.5L363.2 142.9L369.3 146.1L371.7 143.3L384.0 146.2L387.7 149.3L390.5 147.4L401.4 147.0L412.7 159.1L415.6 157.0L420.6 158.7L424.4 156.3L410.9 177.6L407.0 179.0L406.0 189.7L399.8 189.3L396.0 193.5L395.3 187.3L392.8 185.6L390.2 191.3L395.0 195.4L388.9 198.1L390.5 203.6L387.8 206.4L383.4 207.0L378.6 202.6L365.0 199.2L366.1 206.5L362.1 206.3L361.0 209.1L353.9 205.2L351.5 199.0L349.6 201.2L347.0 198.8L343.0 202.9L337.6 198.8L337.1 194.8L339.6 190.2L332.4 186.1L332.6 181.4Z"],["Cuddalore","M332.1 254.4L309.3 251.4L300.0 239.9L303.1 240.2L305.2 233.3L314.0 232.4L315.6 228.8L321.4 229.7L322.8 225.8L326.3 229.7L333.7 231.2L341.1 223.7L346.2 225.5L355.9 220.5L362.4 222.2L361.5 215.7L364.4 213.5L364.4 211.1L361.0 209.1L362.1 206.3L366.1 206.5L365.0 199.2L378.6 202.6L383.4 207.0L387.8 206.4L390.5 203.6L388.9 198.1L395.0 200.0L398.2 198.9L401.4 204.1L394.6 202.4L392.7 208.9L401.1 210.1L396.8 234.4L403.0 249.3L401.9 254.1L397.7 254.0L397.1 257.3L385.7 262.8L379.1 272.4L364.0 279.9L369.7 271.2L368.4 261.7L356.4 255.7L355.9 251.0L345.7 250.6L346.2 254.0L338.3 252.9L332.1 254.4Z"],["Pudukkottai","M258.3 369.3L261.0 359.9L265.3 360.5L268.4 355.7L264.0 351.2L260.7 354.7L255.1 348.2L254.1 340.3L256.6 337.3L261.5 338.3L261.0 333.3L264.1 331.9L265.7 334.8L268.7 335.0L272.5 330.0L276.0 329.8L276.8 333.5L279.8 331.3L279.3 326.5L284.5 328.8L287.0 335.6L290.5 336.0L293.8 331.0L299.5 331.7L299.6 329.8L304.6 333.7L312.1 332.7L312.8 327.9L316.7 332.5L320.8 333.7L320.8 336.2L327.8 337.7L329.1 342.9L333.0 343.2L333.8 348.5L329.0 351.4L331.0 355.7L328.1 361.3L330.3 369.7L326.9 371.0L328.1 379.1L326.3 382.6L331.2 386.9L330.2 390.9L335.8 391.1L338.5 393.5L340.5 405.8L330.3 416.8L326.7 425.3L320.9 425.5L312.6 415.1L313.4 410.0L305.9 406.3L306.5 400.6L309.2 398.1L300.6 391.5L296.8 394.7L292.7 385.0L288.2 386.5L287.9 390.5L281.5 389.1L279.1 392.5L277.0 391.5L277.6 385.8L274.7 383.5L275.2 380.4L267.1 376.6L266.3 380.1L262.3 380.3L258.4 387.7L255.5 385.5L257.2 382.5L253.9 381.9L253.4 378.9L259.3 379.2L260.9 372.2L258.3 369.3Z"],["Sivaganga","M245.2 374.1L249.2 368.1L251.6 368.1L253.0 362.9L259.2 365.3L258.3 369.3L260.9 372.2L259.3 379.2L253.4 378.9L253.9 381.9L257.2 382.5L255.5 385.5L258.4 387.7L262.3 380.3L266.3 380.1L267.1 376.6L275.2 380.4L274.7 383.5L277.6 385.8L277.0 391.5L279.1 392.5L281.5 389.1L287.9 390.5L288.2 386.5L292.7 385.0L296.8 394.7L300.6 391.5L309.2 398.1L306.5 400.6L305.9 406.3L313.4 410.0L312.6 415.1L307.4 418.1L302.1 416.3L302.7 420.5L299.1 425.2L300.7 437.1L294.9 433.5L294.6 426.2L292.5 426.2L290.8 421.1L283.4 423.2L281.8 427.3L281.4 431.3L284.3 435.0L283.3 441.2L289.4 440.3L291.4 442.7L290.9 450.7L293.9 453.6L279.8 456.2L275.7 462.5L266.9 456.3L260.7 456.0L256.0 452.1L247.5 452.3L246.9 448.5L243.0 447.5L237.8 439.8L235.1 445.1L234.0 437.9L226.4 433.3L223.8 435.9L218.6 435.5L219.6 431.8L224.8 430.5L221.7 428.1L218.3 429.9L217.3 425.1L220.2 422.8L237.6 423.9L238.4 417.0L253.7 412.3L253.7 406.8L250.6 402.8L253.4 402.2L253.9 397.4L251.6 394.0L247.7 393.3L246.9 389.3L248.9 384.9L245.2 374.1Z"],["Ramanathapuram","M234.4 489.0L239.0 489.7L243.4 481.7L237.1 482.4L236.9 477.8L230.3 478.1L227.6 470.6L236.7 471.3L239.7 465.4L244.8 463.9L244.6 456.6L250.8 452.6L256.0 452.1L260.7 456.0L266.9 456.3L275.7 462.5L279.8 456.2L293.9 453.6L290.9 450.7L291.4 442.7L289.4 440.3L283.3 441.2L284.3 435.0L281.4 431.3L283.4 423.2L290.8 421.1L292.5 426.2L294.6 426.2L294.9 433.5L300.7 437.1L299.1 425.2L302.7 420.5L302.1 416.3L307.4 418.1L312.6 415.1L318.1 424.0L326.4 425.5L311.4 443.6L305.9 454.1L302.9 468.9L306.3 474.7L320.9 487.4L336.9 489.0L342.7 488.0L347.8 484.1L350.4 486.2L348.1 489.6L351.7 496.1L334.5 489.2L323.5 491.6L311.3 490.1L303.4 492.8L299.8 491.9L283.6 497.4L282.2 499.6L274.7 500.1L275.0 502.7L267.3 506.1L262.5 505.4L245.9 510.3L233.8 504.2L236.1 497.8L233.1 498.2L234.4 489.0Z"],["Nagapattinam","M365.5 373.4L366.0 369.5L368.7 367.5L372.5 368.6L375.2 365.6L383.3 366.4L382.9 358.9L389.5 358.4L392.1 349.9L387.0 344.5L386.9 335.9L393.7 316.0L385.6 315.0L387.1 306.4L393.2 304.7L404.2 309.7L403.9 314.1L407.2 316.1L410.6 372.6L408.2 377.2L398.1 378.3L365.5 373.4ZM370.3 300.2L372.0 295.6L369.8 292.1L374.4 282.5L371.5 276.2L379.1 272.4L385.7 262.8L397.1 257.3L397.7 254.0L401.9 254.1L403.0 249.3L406.3 257.4L407.7 296.6L384.7 295.5L381.9 300.0L370.3 300.2Z"],["Kallakurichi","M282.5 186.6L292.0 182.6L304.0 183.2L309.1 177.1L317.0 177.6L319.3 180.7L322.9 175.7L324.4 177.1L322.2 181.3L327.4 182.7L329.7 179.8L332.6 181.4L332.4 186.1L339.6 190.2L337.1 194.8L337.6 198.8L343.0 202.9L347.0 198.8L349.6 201.2L351.5 199.0L353.9 205.2L364.4 211.1L364.4 213.5L361.5 215.7L362.4 222.2L355.9 220.5L346.2 225.5L341.1 223.7L333.7 231.2L326.3 229.7L322.8 225.8L321.4 229.7L315.6 228.8L314.0 232.4L305.2 233.3L303.1 240.2L300.0 239.9L296.3 238.2L293.4 234.0L294.6 232.2L290.0 228.1L292.0 219.7L289.4 218.0L280.6 219.3L276.1 224.2L275.0 222.0L274.3 210.8L279.7 206.7L279.8 201.4L272.5 199.4L276.2 196.5L281.4 196.2L283.2 193.8L281.1 191.6L282.5 186.6Z"],["Tenkasi","M130.8 473.7L136.2 476.8L139.7 476.1L143.1 479.3L142.1 481.1L150.8 483.3L151.9 478.7L158.6 482.3L158.5 486.2L164.5 488.5L171.8 488.2L180.4 492.6L186.7 493.5L188.1 498.1L185.7 502.0L175.4 502.6L174.5 499.8L167.7 505.3L169.0 509.3L175.0 509.1L175.3 512.1L162.2 514.4L160.6 526.3L158.7 530.8L155.6 532.5L158.9 535.5L156.1 544.4L150.7 544.7L145.0 541.9L142.4 549.7L133.1 548.6L126.9 544.1L129.1 540.0L128.0 535.1L121.7 534.3L117.8 531.6L109.9 519.7L123.0 503.6L121.7 498.7L124.7 488.0L130.7 479.5L130.8 473.7Z"],["Tirunelveli","M162.2 514.4L171.8 515.1L169.2 519.2L173.8 522.7L169.5 525.5L170.0 528.9L177.1 528.9L177.2 533.0L181.6 534.3L187.1 542.7L183.8 545.6L183.6 562.1L180.0 563.5L179.5 567.5L183.2 569.7L188.0 594.6L191.4 596.5L200.3 595.3L186.1 604.6L180.8 614.6L176.9 616.5L174.1 614.4L158.4 617.1L152.9 614.7L153.1 606.9L155.5 601.9L152.2 591.6L145.5 587.9L145.5 581.8L142.4 579.5L141.8 576.0L134.8 574.7L123.1 568.0L113.2 551.0L122.6 538.5L121.7 534.3L128.0 535.1L129.1 540.0L126.9 544.1L137.2 549.8L142.4 549.7L145.0 541.9L150.7 544.7L156.1 544.4L158.9 535.5L155.6 532.5L158.7 530.8L160.6 526.3L162.2 514.4Z"],["Vellore","M336.5 96.9L336.2 101.3L328.1 99.4L320.7 101.2L316.1 107.2L314.3 106.1L310.4 109.6L303.8 107.8L297.9 113.9L292.5 113.5L288.1 108.6L292.0 100.6L292.3 94.6L302.5 88.9L304.0 84.6L289.7 89.9L285.9 93.2L282.3 88.7L276.1 87.9L269.8 90.2L273.2 80.5L271.8 73.8L275.7 71.1L281.1 71.1L282.2 65.1L286.2 66.6L293.0 62.8L296.2 64.0L301.6 61.9L301.6 69.1L305.1 63.8L311.6 63.1L317.4 65.0L322.4 69.9L325.5 68.4L331.5 70.5L334.7 67.4L334.3 63.0L339.4 61.0L338.7 55.2L345.8 67.0L343.1 77.6L337.4 77.8L334.0 82.0L333.1 92.9L336.5 96.9Z"],["Ranipet","M338.7 55.2L350.4 66.0L358.0 63.8L357.7 61.1L361.3 57.5L363.2 62.3L365.9 60.8L366.6 57.2L383.0 56.5L384.8 50.5L390.0 55.0L394.6 54.1L394.8 65.5L395.7 67.1L400.2 66.5L400.4 70.1L386.1 78.3L386.4 80.7L376.0 84.1L375.1 89.2L365.5 86.9L363.8 90.2L364.7 106.4L363.2 109.6L355.7 114.4L352.8 109.5L357.0 107.6L346.1 101.1L341.3 94.3L336.5 96.9L333.1 92.9L334.0 82.0L337.4 77.8L343.1 77.6L345.8 67.0L338.7 55.2Z"],["Tirupathur","M274.8 155.9L269.7 154.9L271.4 145.9L266.1 141.4L251.5 140.7L253.0 134.5L249.2 130.1L248.9 114.6L255.4 114.0L255.0 109.1L258.9 108.4L259.0 103.6L264.6 106.5L264.8 100.0L268.7 97.2L269.8 90.2L276.1 87.9L282.3 88.7L285.9 93.2L289.7 89.9L304.0 84.6L302.5 88.9L292.3 94.6L292.0 100.6L288.1 108.6L292.5 113.5L297.9 113.9L287.0 135.2L288.1 137.6L283.8 142.9L281.6 150.7L274.8 155.9Z"],["Kancheepuram","M400.4 70.1L403.6 72.3L403.9 76.9L411.5 79.0L417.2 71.8L416.6 69.1L426.1 68.2L432.4 71.0L430.5 71.8L431.5 76.3L435.1 77.9L429.6 85.9L429.4 90.8L418.8 96.3L413.6 95.3L410.6 98.9L418.3 105.3L414.4 108.4L415.7 113.4L404.1 115.3L403.8 120.0L395.4 125.2L392.1 123.3L393.2 119.0L386.8 118.3L382.9 114.1L384.6 109.7L395.1 107.1L395.5 101.5L390.4 97.9L384.6 98.3L383.9 93.6L375.1 89.2L376.0 84.1L386.4 80.7L386.1 78.3L400.4 70.1Z"],["Chengalpattu","M430.5 71.8L432.7 68.8L437.6 68.9L438.7 74.7L442.4 76.5L444.3 81.7L443.7 87.7L451.0 88.8L451.6 97.1L438.7 138.8L420.6 158.7L409.7 157.6L401.4 147.0L390.5 147.4L387.7 149.3L384.0 146.2L387.2 140.7L396.0 133.6L395.4 125.2L403.8 120.0L404.1 115.3L415.7 113.4L414.4 108.4L418.3 105.3L410.6 98.9L413.6 95.3L418.8 96.3L429.4 90.8L429.6 85.9L435.1 77.9L431.5 76.3L430.5 71.8Z"]],"outline":"M129.9 618.5L120.9 613.7L104.3 600.1L106.6 596.8L111.0 596.1L112.8 593.6L111.1 591.6L116.9 580.1L124.8 571.6L113.2 551.0L122.6 538.5L121.7 534.3L109.9 519.7L123.0 503.6L121.7 498.7L124.7 488.0L130.7 479.5L130.8 473.7L133.8 469.3L136.7 469.3L137.8 462.0L135.8 462.6L126.9 453.7L123.2 456.7L112.0 451.9L120.6 431.4L118.5 428.8L119.5 424.5L117.7 423.9L117.5 419.4L123.5 411.4L122.3 405.1L115.6 396.8L120.4 394.0L123.0 395.1L125.2 382.8L122.6 382.4L118.6 373.5L119.4 369.3L112.9 368.6L103.5 373.6L99.2 379.2L91.8 383.9L83.6 382.4L74.8 374.8L76.8 367.6L73.3 361.4L75.8 342.1L73.4 341.3L73.1 337.6L80.6 337.2L78.8 332.2L82.9 323.3L82.6 318.3L79.2 318.2L74.9 311.3L56.0 304.6L62.3 292.3L65.6 290.5L65.8 281.7L61.1 280.9L60.0 278.1L64.4 272.6L61.1 269.9L52.7 275.0L42.2 276.0L38.4 273.1L32.9 273.8L33.4 270.0L43.2 263.6L43.7 256.6L34.1 253.2L24.1 245.7L19.4 245.9L12.6 242.9L9.2 233.2L14.2 229.5L16.7 232.8L25.1 229.3L26.2 226.3L30.5 225.8L39.8 217.8L42.8 219.6L46.2 227.6L76.6 230.2L75.3 225.1L83.4 207.7L90.2 209.8L94.9 205.5L102.6 213.9L105.8 213.7L105.7 210.1L119.8 207.8L121.0 205.7L125.8 206.2L130.4 210.4L137.0 208.7L140.6 210.9L147.7 191.4L167.9 190.2L170.1 183.0L178.8 171.5L173.9 164.6L160.9 161.7L150.6 163.0L145.5 161.3L145.3 157.5L147.3 153.4L151.5 153.6L160.9 144.4L162.5 133.5L160.4 131.6L161.2 128.4L158.1 127.2L157.3 120.6L160.2 114.4L159.4 110.1L166.1 108.2L168.2 110.8L175.0 109.3L180.9 99.9L181.5 89.4L185.5 87.3L191.5 87.4L195.8 85.0L196.8 87.1L194.4 90.9L197.0 92.6L202.4 92.8L206.9 89.3L211.9 90.7L218.3 97.2L228.9 99.6L229.9 106.1L233.9 106.2L236.2 109.6L245.3 114.8L255.4 114.0L255.0 109.1L258.9 108.4L259.0 103.6L264.6 106.5L264.8 100.0L268.7 97.2L273.2 80.5L271.8 73.8L275.7 71.1L281.1 71.1L282.2 65.1L286.2 66.6L293.0 62.8L296.2 64.0L301.6 61.9L301.6 69.1L305.1 63.8L311.6 63.1L317.4 65.0L322.4 69.9L325.5 68.4L331.5 70.5L334.7 67.4L334.3 63.0L339.4 61.0L338.7 55.2L347.6 60.2L353.7 58.2L352.7 54.4L356.7 51.2L361.0 51.6L363.4 46.1L359.6 45.6L357.4 35.8L368.0 34.2L372.7 34.9L373.0 42.3L376.7 43.8L380.2 40.5L387.4 41.4L388.8 45.4L392.6 48.5L394.1 46.3L397.2 49.5L401.0 45.7L394.4 41.9L398.0 37.6L400.6 39.9L403.4 37.1L416.0 33.4L419.0 30.3L416.9 25.2L420.6 24.7L420.5 20.2L424.4 19.2L426.7 12.4L432.0 13.8L432.2 18.0L450.2 19.9L452.6 9.8L459.4 22.9L461.5 41.5L452.1 79.8L451.6 97.1L440.8 133.3L438.7 138.8L429.8 148.3L410.9 177.6L407.0 179.0L406.0 189.7L399.8 189.3L396.0 193.5L395.3 187.3L392.8 185.6L390.2 191.3L395.0 195.4L388.9 198.1L395.0 200.0L398.2 198.9L401.4 204.1L394.6 202.4L392.7 208.9L401.1 210.1L396.8 234.4L406.3 257.4L407.7 296.6L395.9 297.2L397.1 301.2L392.9 300.2L393.2 304.7L404.2 309.7L403.9 314.1L407.2 316.1L410.6 372.6L408.2 377.2L398.1 378.3L355.3 373.4L346.6 379.1L338.5 393.5L340.5 405.8L311.4 443.6L305.9 454.1L302.9 468.9L306.3 474.7L320.9 487.4L336.9 489.0L342.7 488.0L347.8 484.1L350.4 486.2L348.1 489.6L351.7 496.1L334.5 489.2L323.5 491.6L311.3 490.1L303.4 492.8L299.8 491.9L283.6 497.4L282.2 499.6L274.7 500.1L275.0 502.7L267.3 506.1L249.2 508.0L228.4 523.9L222.4 533.8L221.2 542.6L225.0 548.6L218.8 556.6L219.3 576.6L210.5 586.6L210.7 591.0L202.6 593.6L186.1 604.6L180.8 614.6L176.9 616.5L174.1 614.4L158.4 617.1L154.7 624.2L129.9 618.5Z","cities":{"Chennai":[453.3,63.5],"Coimbatore":[88.7,294.9],"Madurai":[216.7,417.2],"Tiruchirappalli":[281.1,320.3],"Tirunelveli":[176.8,552.8],"Rameswaram":[348.0,488.6],"Salem":[219.6,222.4],"Erode":[172.4,258.6],"Thanjavur":[328.7,320.7],"Kanyakumari":[152.8,622.9],"Vellore":[328.1,82.2],"Bengaluru":[158.9,76.0]}};
+/* ================= data ================= */
+const TA={Chennai:"சென்னை",Coimbatore:"கோயம்புத்தூர்",Madurai:"மதுரை",Tiruchirappalli:"திருச்சி",Tirunelveli:"திருநெல்வேலி",Rameswaram:"இராமேஸ்வரம்",Salem:"சேலம்",Erode:"ஈரோடு",Thanjavur:"தஞ்சாவூர்",Kanyakumari:"கன்னியாகுமரி",Vellore:"வேலூர்",Bengaluru:"பெங்களூரு"};
+const LBL={Chennai:["end",-11,4],Vellore:["end",-11,-1],Bengaluru:["start",11,-1],Salem:["start",11,-1],Erode:["end",-11,6],Coimbatore:["start",11,4],Tiruchirappalli:["end",-11,-1],Thanjavur:["start",11,4],Madurai:["end",-11,4],Rameswaram:["start",11,4],Tirunelveli:["start",11,3],Kanyakumari:["start",11,3]};
+const CITIES=Object.keys(MAP.cities).sort();
+const TYPES={AC_SLEEPER:["AC Sleeper",2.1],AC_SEATER:["AC Seater",1.6],NON_AC_SEATER:["Non-AC Seater",1.0],DELUXE:["Deluxe",1.3]};
+const BUSES0=[["TN58-AC-1001",30,"AC_SLEEPER"],["TN58-AC-1002",30,"AC_SLEEPER"],["TN58-AC-1003",30,"AC_SLEEPER"],["TN58-AS-2001",40,"AC_SEATER"],["TN58-AS-2002",40,"AC_SEATER"],["TN58-AS-2003",40,"AC_SEATER"],["TN58-AS-2004",40,"AC_SEATER"],["TN58-NA-3001",50,"NON_AC_SEATER"],["TN58-NA-3002",50,"NON_AC_SEATER"],["TN58-NA-3003",50,"NON_AC_SEATER"],["TN58-NA-3004",45,"NON_AC_SEATER"],["TN58-NA-3005",50,"NON_AC_SEATER"],["TN58-DX-4001",36,"DELUXE"],["TN58-DX-4002",36,"DELUXE"],["TN58-DX-4003",36,"DELUXE"],["TN58-DX-4004",36,"DELUXE"]];
+const ROUTES0=[["Chennai","Madurai",462,2],["Madurai","Coimbatore",215,2],["Madurai","Tiruchirappalli",135,2],["Chennai","Coimbatore",505,2],["Chennai","Tiruchirappalli",330,2],["Chennai","Salem",345,2],["Madurai","Tirunelveli",160,1],["Madurai","Bengaluru",435,1],["Coimbatore","Bengaluru",365,1],["Madurai","Rameswaram",170,1],["Tiruchirappalli","Coimbatore",210,1],["Coimbatore","Salem",165,1],["Madurai","Kanyakumari",245,1],["Tiruchirappalli","Thanjavur",60,1],["Chennai","Vellore",140,1],["Erode","Coimbatore",100,1],["Salem","Bengaluru",205,1]];
+const TIMES=["05:30","07:00","09:30","13:00","18:30","21:00","22:30"];
+const MAXSEATS=4;
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const rs=n=>"Rs. "+Math.round(n).toLocaleString("en-IN");
+const hhmm=d=>pad(d.getHours())+":"+pad(d.getMinutes());
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const nice=s=>{const d=new Date(s+"T00:00:00");return DOW[d.getDay()]+", "+d.getDate()+" "+MON[d.getMonth()]};
+const maskName=n=>String(n||"").split(" ").map(w=>w?w[0]+"•••":"").join(" ");
+function toast(t,kind){const e=document.createElement("div");e.className="toast "+(kind||"");e.textContent=t;$("toasts").appendChild(e);setTimeout(()=>e.remove(),kind==="err"?6500:4200)}
+function confirmBox(title,body,okLabel,danger){return new Promise(res=>{const m=$("modal");m.innerHTML=`<div class="mbox"><h3>${esc(title)}</h3><div>${body}</div><div class="acts"><button class="btn ghost" id="mNo">Keep it</button><button class="btn ${danger?"danger":""}" id="mYes">${esc(okLabel)}</button></div></div>`;m.classList.add("on");
+ const done=v=>{m.classList.remove("on");m.innerHTML="";res(v)};$("mNo").onclick=()=>done(false);$("mYes").onclick=()=>done(true);m.onclick=e=>{if(e.target===m)done(false)};$("mYes").focus()})}
+/* ================= store: shared database or in-memory demo ================= */
+const S={seats:{},tickets:{},ext:{buses:[],routes:[],schedules:[]}};
+let store=null,mode="demo",isAdmin=true,IDX={};
+const ui={tab:"book",from:"",to:"",day:"",type:"",sort:"time",trip:null,picks:[],my:null};
+let raf=0;function changed(){IDX={};Object.values(S.seats).forEach(x=>{(IDX[x.sch]=IDX[x.sch]||new Set()).add(x.seat)});TRIPS=null;cancelAnimationFrame(raf);raf=requestAnimationFrame(refresh)}
+function memStore(persist){const K="tn-express-v1";
+ if(persist)try{const j=JSON.parse(localStorage.getItem(K)||"null");if(j){S.seats=j.seats||{};S.tickets=j.tickets||{};S.ext=Object.assign({buses:[],routes:[],schedules:[]},j.ext||{})}}catch(e){}
+ const save=()=>{if(persist)try{localStorage.setItem(K,JSON.stringify({seats:S.seats,tickets:S.tickets,ext:S.ext}))}catch(e){}changed()};
+ return{
+ async claim(sch,seat,data){const k=sch+"_"+seat;if(S.seats[k])return false;S.seats[k]=data;save();return true},
+ async release(sch,seat){delete S.seats[sch+"_"+seat];save()},
+ async putTicket(c,t){S.tickets[c]=t;save()},
+ async getTicket(c){return S.tickets[c]||null},
+ async updTicket(c,p){Object.assign(S.tickets[c],p);save()},
+ async delTicket(c){delete S.tickets[c];save()},
+ async add(kind,o){S.ext[kind].push(o);save()}}}
+async function dbStore(db){
+ const sub=(path,fn)=>db.collection(path).onSnapshot(s=>{fn(s);changed()},()=>{});
+ sub("seats",s=>{S.seats={};s.docs.forEach(d=>{const x=d.data()||{};S.seats[d.id]=x.data||x})});
+ sub("tickets",s=>{S.tickets={};s.docs.forEach(d=>S.tickets[d.id]=d.data())});
+ for(const k of["buses","routes","schedules"])sub(k,s=>{S.ext[k]=s.docs.map(d=>d.data())});
+ return{
+  async claim(sch,seat,data){const r=await db.doc("seats/"+sch+"_"+seat).acquire({holder:data.code,ttlMs:2592000000,data});return !!r.acquired},
+  async release(sch,seat){await db.doc("seats/"+sch+"_"+seat).delete()},
+  async putTicket(c,t){await db.doc("tickets/"+c).set(t)},
+  async getTicket(c){const d=await db.doc("tickets/"+c).get();return d.exists?d.data():null},
+  async updTicket(c,p){await db.doc("tickets/"+c).update(p)},
+  async delTicket(c){await db.doc("tickets/"+c).delete()},
+  async add(kind,o){await db.collection(kind).add(o)}}}
+/* ================= network + trips ================= */
+const allBuses=()=>BUSES0.map((b,i)=>({id:"B"+(i+1),no:b[0],cap:b[1],type:b[2]})).concat(S.ext.buses);
+const allRoutes=()=>ROUTES0.map((r,i)=>({id:"R"+(i+1),a:r[0],b:r[1],km:r[2],freq:r[3]})).concat(S.ext.routes.filter(r=>MAP.cities[r.a]&&MAP.cities[r.b]));
+const routeBetween=(x,y)=>allRoutes().find(r=>(r.a===x&&r.b===y)||(r.a===y&&r.b===x));
+const rlabel=r=>r.a+" ⇄ "+r.b;
+let TRIPS=null,TMIN=0;
+function trips(){const m=Math.floor(Date.now()/6e4);if(TRIPS&&m===TMIN)return TRIPS;TMIN=m;
+ const B=allBuses(),R=allRoutes(),now=new Date(),used=new Set(),raw=[];
+ for(let d=0;d<7;d++){const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d),date=ymd(day);
+  R.forEach((r,ri)=>{for(let dir=0;dir<2;dir++)for(let k=0;k<(r.freq||1);k++){
+   const time=TIMES[(ri*3+dir*2+k*3+d)%7];let bus=null;
+   for(let j=0;j<B.length;j++){const c=B[(ri*5+dir*3+k*7+d*2+j)%B.length];if(!used.has(c.id+date+time)){bus=c;break}}
+   if(!bus)continue;used.add(bus.id+date+time);
+   const fare=Math.max(60,Math.round(r.km*TYPES[bus.type][1]*(1+((ri+d)%4)*.02)/5)*5);
+   raw.push({id:date.replace(/-/g,"")+"-"+r.id+(dir?"r":"f")+"-"+time.replace(":",""),bus:bus.id,rid:r.id,from:dir?r.b:r.a,to:dir?r.a:r.b,date,time,fare})}})}
+ S.ext.schedules.forEach(s=>raw.push(s));
+ const seen=new Set(),out=[];
+ raw.forEach(s=>{const b=B.find(x=>x.id===s.bus),r=R.find(x=>x.id===s.rid);if(!b||!r)return;
+  const k=s.bus+s.date+s.time;if(s.id.includes("X")){if(seen.has(k))return}seen.add(k);
+  const dep=new Date(s.date+"T"+s.time+":00");if(dep<=now)return;
+  out.push({...s,b,r,dep,arr:new Date(dep.getTime()+r.km/46*36e5)})});
+ return TRIPS=out.sort((x,y)=>x.dep-y.dep)}
+const bookedN=id=>IDX[id]?IDX[id].size:0;
+const freeN=t=>t.b.cap-bookedN(t.id);
+/* ================= map ================= */
+function routeStats(){const st={};Object.values(S.tickets).forEach(t=>{const s=st[t.rid]=st[t.rid]||{n:0,c:0,rev:0};t.status==="CONFIRMED"?s.n++:s.c++;s.rev+=t.fare-(t.refund||0)});return st}
+function mapSVG(modeName){
+ const R=allRoutes(),C=MAP.cities,dm=modeName==="demand",st=dm?routeStats():null;
+ const mx=dm?Math.max(1,...R.map(r=>(st[r.id]||{n:0}).n)):1;
+ const cityN={};if(dm)R.forEach(r=>{const n=(st[r.id]||{n:0}).n;cityN[r.a]=(cityN[r.a]||0)+n;cityN[r.b]=(cityN[r.b]||0)+n});
+ const cmx=Math.max(1,...Object.values(cityN),1);
+ let s=`<svg class="tn ${dm?"dm":""}" viewBox="-12 -12 ${MAP.w+24} ${MAP.h+24}" role="img" aria-label="Map of Tamil Nadu with bus routes">`;
+ MAP.districts.forEach(([n,d])=>{s+=`<path class="dist" d="${d}"><title>${esc(n)} district</title></path>`});
+ s+=`<path class="out" d="${MAP.outline}"/>`;
+ const selR=!dm&&ui.from&&ui.to?routeBetween(ui.from,ui.to):null;
+ R.forEach(r=>{const a=C[r.a],b=C[r.b],mxp=(a[0]+b[0])/2,myp=(a[1]+b[1])/2,dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,o=L*.09;
+  const cx=mxp-dy/L*o,cy=myp+dx/L*o;let cls="rt";
+  if(!dm){if(selR&&selR.id===r.id)cls+=" sel";else if(ui.from&&r.a!==ui.from&&r.b!==ui.from)cls+=" dim";else if(selR)cls+=" dim"}
+  const w=dm?(1.5+8*((st[r.id]||{n:0}).n/mx)):null;
+  const tip=dm?`${rlabel(r)}: ${(st[r.id]||{n:0}).n} tickets, ${rs((st[r.id]||{rev:0}).rev)}`:`${rlabel(r)} · ${r.km} km`;
+  s+=`<path class="${cls}" d="M${a[0]} ${a[1]}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b[0]} ${b[1]}"${w?` style="stroke-width:${w.toFixed(1)}px"`:""}><title>${esc(tip)}</title></path>`});
+ const reach=new Set();if(!dm&&ui.from){reach.add(ui.from);R.forEach(r=>{if(r.a===ui.from)reach.add(r.b);if(r.b===ui.from)reach.add(r.a)})}
+ CITIES.forEach(n=>{const [x,y]=C[n],l=LBL[n]||["start",11,3];let cls="city";
+  if(!dm){if(n===ui.from)cls+=" from";else if(n===ui.to)cls+=" to";else if(ui.from&&!reach.has(n))cls+=" dim"}
+  const rad=dm?4+9*((cityN[n]||0)/cmx):6;
+  s+=`<g class="${cls}" data-c="${esc(n)}" tabindex="${dm?-1:0}" role="button" aria-label="${esc(n)}"><circle cx="${x}" cy="${y}" r="${rad.toFixed(1)}"/><text x="${x+l[1]}" y="${y+l[2]}" text-anchor="${l[0]}">${esc(n)}${n==="Bengaluru"?" (KA)":""}</text><text class="ta" x="${x+l[1]}" y="${y+l[2]+10}" text-anchor="${l[0]}">${esc(TA[n]||"")}</text><title>${esc(n)}${TA[n]?" · "+esc(TA[n]):""}</title></g>`});
+ return s+"</svg>"}
+function cityClick(n){
+ if(!ui.from||n===ui.from&&!ui.to){ui.from=ui.from===n?"":n;ui.to=""}
+ else if(n===ui.from){ui.from="";ui.to=""}
+ else if(routeBetween(ui.from,n)){ui.to=n}
+ else{toast("No direct bus between "+ui.from+" and "+n+". Showing buses from "+n+" instead.");ui.from=n;ui.to=""}
+ syncSelectors();drawBook()}
+/* ================= book: step 1 ================= */
+function syncSelectors(){$("fFrom").value=ui.from;$("fTo").value=ui.to}
+function setSelectors(){const o=a=>'<option value="">Any city</option>'+a.map(c=>`<option>${esc(c)}</option>`).join("");$("fFrom").innerHTML=o(CITIES);$("fTo").innerHTML=o(CITIES);syncSelectors()}
+function drawDays(){const days=[];for(let d=0;d<7;d++){const x=new Date();x.setDate(x.getDate()+d);days.push([ymd(x),d===0?"Today":d===1?"Tomorrow":DOW[x.getDay()],x.getDate()+" "+MON[x.getMonth()]])}
+ $("days").innerHTML=`<button class="day ${ui.day?"":"on"}" data-day=""><b>All</b><span>7 days</span></button>`+days.map(d=>`<button class="day ${ui.day===d[0]?"on":""}" data-day="${d[0]}"><b>${d[2]}</b><span>${d[1]}</span></button>`).join("")}
+function drawChips(){$("chips").innerHTML=`<button class="chip ${ui.type?"":"on"}" data-type="">All buses</button>`+Object.entries(TYPES).map(([k,v])=>`<button class="chip ${ui.type===k?"on":""}" data-type="${k}">${v[0]}</button>`).join("")}
+function filtered(){let l=trips().filter(t=>(!ui.from||t.from===ui.from)&&(!ui.to||t.to===ui.to)&&(!ui.day||t.date===ui.day)&&(!ui.type||t.b.type===ui.type));
+ if(ui.sort==="fare")l=l.slice().sort((a,b)=>a.fare-b.fare||a.dep-b.dep);else if(ui.sort==="seats")l=l.slice().sort((a,b)=>freeN(b)-freeN(a)||a.dep-b.dep);return l}
+function drawResults(){const all=filtered(),l=all.slice(0,40);
+ if(!l.length){$("results").innerHTML=`<div class="empty"><b>No buses match</b>Try another day, bus type or city pair.<div class="acts" style="justify-content:center"><button class="btn ghost sm" id="rst">Reset filters</button></div></div>`;const b=$("rst");if(b)b.onclick=()=>{ui.from=ui.to=ui.day=ui.type="";syncSelectors();drawBook()};return}
+ $("results").innerHTML=`<div class="hint" style="margin-bottom:4px">${all.length} bus${all.length>1?"es":""} found${all.length>40?" · showing first 40":""}</div>`+l.map(t=>{const f=freeN(t),pct=100*bookedN(t.id)/t.b.cap;
+  return`<div class="trip"><div><div class="tt"><span>${hhmm(t.dep)}<small> ${esc(t.from)}</small></span><span class="ln"></span><span>${hhmm(t.arr)}<small> ${esc(t.to)}${t.arr.getDate()!==t.dep.getDate()?" (+1)":""}</small></span></div>
+  <div class="meta" style="margin-top:4px"><span class="tag">${TYPES[t.b.type][0]}</span>${nice(t.date)} · ${t.r.km} km · ${esc(t.b.no)}</div>
+  <div class="meter" title="${Math.round(pct)}% booked"><i class="${f===0?"full":pct>75?"hi":""}" style="width:${Math.max(3,pct)}%"></i></div></div>
+  <div><div class="price">${rs(t.fare)}<small>${f?f+" seats left":"Sold out"}</small></div><button class="btn sm" data-trip="${esc(t.id)}" style="margin-top:6px;float:right" ${f?"":"disabled"}>${f?"Select seats":"Full"}</button></div></div>`}).join("")}
+function drawBook(){$("map1").innerHTML=mapSVG("book");
+ $("sel").innerHTML=(ui.from||ui.to)?`<span class="chip on">${esc(ui.from||"Any")} → ${esc(ui.to||"Any")}</span><button class="chip" id="clr">Clear ✕</button>`:'<span class="hint">Tap a city to start</span>';
+ const c=$("clr");if(c)c.onclick=()=>{ui.from=ui.to="";syncSelectors();drawBook()};
+ drawDays();drawChips();drawResults();drawStats()}
+function drawStats(){const T=trips(),free=T.reduce((a,t)=>a+freeN(t),0),R=allRoutes();
+ $("stats").innerHTML=[[CITIES.length,"cities"],[R.length,"routes"],[T.length,"buses this week"],[free.toLocaleString("en-IN"),"seats available"]].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}
+/* ================= book: steps 2-3 ================= */
+const curTrip=()=>trips().find(t=>t.id===ui.trip);
+function openTrip(id){ui.trip=id;ui.picks=[];const t=curTrip();if(!t)return;
+ $("bk1").classList.add("hide");$("bk3").classList.add("hide");$("bk2").classList.remove("hide");document.querySelector(".hero").classList.add("hide");
+ $("bk2").innerHTML=`<button class="link" id="back">← Back to buses</button>
+ <div class="card"><div class="tt"><span>${hhmm(t.dep)}<small> ${esc(t.from)}</small></span><span class="ln"></span><span>${hhmm(t.arr)}<small> ${esc(t.to)}</small></span></div>
+ <div class="meta" style="margin-top:6px"><span class="tag">${TYPES[t.b.type][0]}</span>${nice(t.date)} · ${t.r.km} km · ${esc(t.b.no)} · ${t.b.cap} seats · ${rs(t.fare)} per seat</div></div>
+ <div class="split"><div class="card"><h3>Choose your seats <span class="hint">(up to ${MAXSEATS})</span></h3>
+  <div class="legend"><span><i></i>Available</span><span><i class="s"></i>Selected</span><span><i class="t"></i>Booked</span></div><div id="seatWrap"></div></div>
+ <div class="card"><h3>Passenger details</h3>
+  <label for="pName">Full name</label><input id="pName" autocomplete="name" placeholder="As on ID"><div class="err" id="eName"></div>
+  <label for="pPhone" style="margin-top:8px">Mobile number</label><input id="pPhone" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile"><div class="err" id="ePhone"></div>
+  <div class="sum" id="summary"></div><button class="btn" id="bookBtn" style="width:100%"></button>
+  <p class="hint" style="margin:8px 0 0">No seat tapped? We will allot the first free seat.</p></div></div>`;
+ $("back").onclick=()=>{document.querySelector(".hero").classList.remove("hide");ui.trip=null;$("bk2").classList.add("hide");$("bk1").classList.remove("hide");drawResults()};
+ $("bookBtn").onclick=doBook;drawSeats();window.scrollTo({top:0,behavior:"smooth"})}
+function drawSeats(){const t=curTrip(),w=$("seatWrap");if(!t||!w)return;const tk=IDX[t.id]||new Set(),lay=t.b.type==="AC_SLEEPER"?[1,2]:[2,2],per=lay[0]+lay[1];
+ ui.picks=ui.picks.filter(n=>!tk.has(n));let h='<div class="bus"><div class="front"><span>Driver</span><span>Front ▲</span></div>';
+ for(let r=0;r<Math.ceil(t.b.cap/per);r++){h+='<div class="srow">';for(let c=0;c<per;c++){if(c===lay[0])h+='<span class="aisle"></span>';const n=r*per+c+1;
+  h+=n>t.b.cap?'<span class="seat sp"></span>':`<button class="seat ${tk.has(n)?"t":""} ${ui.picks.includes(n)?"s":""}" data-s="${n}" ${tk.has(n)?"disabled":""} aria-label="Seat ${n}${tk.has(n)?" booked":""}" aria-pressed="${ui.picks.includes(n)}">${n}</button>`}h+="</div>"}
+ w.innerHTML=h+"</div>";drawSummary()}
+function drawSummary(){const t=curTrip();if(!t||!$("summary"))return;const n=ui.picks.length||1;
+ $("summary").innerHTML=`<div><span>Seats</span><b>${ui.picks.length?ui.picks.slice().sort((a,b)=>a-b).join(", "):"Auto-allot"}</b></div><div><span>Fare × ${n}</span><span>${rs(t.fare*n)}</span></div><div class="tot"><span>Total</span><span>${rs(t.fare*n)}</span></div>`;
+ $("bookBtn").textContent=`Book ${n} seat${n>1?"s":""} · ${rs(t.fare*n)}`}
+async function doBook(){const t=curTrip();if(!t)return;const name=$("pName").value.trim().replace(/\s+/g," "),phone=$("pPhone").value.trim();let bad=false;
+ $("eName").textContent=/^[A-Za-z][A-Za-z .'-]{1,79}$/.test(name)?"":(bad=true,"Enter a valid name (letters only).");
+ $("ePhone").textContent=/^[6-9]\d{9}$/.test(phone)?"":(bad=true,"Enter a 10-digit Indian mobile number.");
+ if(bad)return;if(t.dep<=new Date())return toast("This bus has already departed.","err");
+ const btn=$("bookBtn");btn.disabled=true;btn.textContent="Booking…";const claimed=[];
+ try{
+  let want=ui.picks.slice().sort((a,b)=>a-b);const mk=()=>"TKT"+Date.now().toString(36).toUpperCase().slice(-5)+Math.random().toString(36).slice(2,5).toUpperCase();
+  const made=[];
+  if(want.length){for(const s of want){const code=mk();if(!(await store.claim(t.id,s,{sch:t.id,seat:s,code}))){await Promise.all(claimed.map(c=>store.release(t.id,c.seat)));toast(`Seat ${s} was just taken by someone else. Please choose again.`,"err");ui.picks=ui.picks.filter(x=>x!==s);drawSeats();return}claimed.push({seat:s,code})}}
+  else{if(bookedN(t.id)>=t.b.cap){toast("This bus is full.","err");return}const tk=IDX[t.id]||new Set();
+   for(let i=1;i<=t.b.cap&&!claimed.length;i++){if(tk.has(i))continue;const code=mk();if(await store.claim(t.id,i,{sch:t.id,seat:i,code}))claimed.push({seat:i,code})}
+   if(!claimed.length){toast("This bus is full.","err");return}}
+  for(const c of claimed){const tk={code:c.code,sch:t.id,seat:c.seat,name,phone,fare:t.fare,refund:0,status:"CONFIRMED",ts:Date.now(),from:t.from,to:t.to,date:t.date,time:t.time,bus:t.b.no,type:t.b.type,rid:t.rid};
+   try{await store.putTicket(c.code,tk)}catch(e){await Promise.all(claimed.map(x=>store.release(t.id,x.seat)));await Promise.all(made.map(x=>store.delTicket(x.code)));throw e}made.push(tk)}
+  showTickets(made);toast(`Booked ${made.length} seat${made.length>1?"s":""}. Have a safe journey!`,"ok");
+ }catch(e){toast("Could not complete booking: "+(e&&e.message||"storage unavailable")+(mode==="shared"?" You may need Contributor access to the shared page.":""),"err")}
+ finally{if(btn.isConnected){btn.disabled=false;drawSummary()}}}
+/* ================= tickets ================= */
+function barcode(code){let x=2,r="";for(let i=0;i<code.length;i++){const v=code.charCodeAt(i);for(let b=0;b<4;b++){const w=1+((v>>b)&1)+(b===3?1:0);if(b%2===0)r+=`<rect x="${x}" y="0" width="${w}" height="34"/>`;x+=w+1}}return`<svg class="bc" viewBox="0 0 ${x+2} 34" preserveAspectRatio="none" aria-hidden="true">${r}</svg>`}
+function stCls(t){return t.status==="CANCELLED"?"bad":new Date(t.date+"T"+t.time+":00")<new Date()?"warn":"ok"}
+function stTxt(t){return t.status==="CANCELLED"?"Cancelled":new Date(t.date+"T"+t.time+":00")<new Date()?"Completed":"Confirmed"}
+function ticketCard(t,acts){const dep=new Date(t.date+"T"+t.time+":00");
+ return`<div class="ticket"><div class="main"><div class="meta">E-TICKET · <span class="code">${esc(t.code)}</span> <span class="st ${stCls(t)}">${stTxt(t)}</span></div>
+ <h3 style="margin:6px 0 2px">${esc(t.from)} → ${esc(t.to)}</h3><div class="meta">${nice(t.date)} · departs ${hhmm(dep)} · ${esc(t.bus)} (${TYPES[t.type]?TYPES[t.type][0]:""})</div>
+ <div style="margin-top:8px;font-size:14px"><b>${esc(t.name)}</b> · fare ${rs(t.fare)}${t.status==="CANCELLED"?` · refund ${rs(t.refund||0)}`:""}</div>${acts||""}</div>
+ <div class="stub"><div class="meta">SEAT</div><div class="seatno">${t.seat}</div>${barcode(t.code)}</div></div>`}
+function ticketText(t){return["TN EXPRESS - E-TICKET","Ticket   : "+t.code,"Passenger: "+t.name,"Route    : "+t.from+" -> "+t.to,"Date     : "+t.date+" "+t.time,"Bus      : "+t.bus,"Seat     : "+t.seat,"Fare     : Rs. "+t.fare,"Status   : "+t.status,"","Carry a valid ID. Cancel any time from the My trips page."].join("\r\n")}
+async function saveText(name,data,mime){try{const d=await claude.use("downloads");if(!d)throw 0;await d.save({filename:name,data});toast("File saved.","ok")}catch(e){try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:mime||"text/plain"}));a.download=name;a.click()}catch(_){toast("Download is not available in this view.","err")}}}
+function showTickets(list){ui.tickets=list;document.querySelector(".hero").classList.add("hide");$("bk2").classList.add("hide");const b=$("bk3");b.classList.remove("hide");
+ b.innerHTML=`<div class="card" style="border-left:5px solid var(--ok)"><h3 style="color:var(--ok);margin:0">Booking confirmed ✓</h3><div class="meta">Keep your ticket code and mobile number. You can cancel from <b>My trips</b>.</div></div>`+list.map(t=>ticketCard(t,`<div class="acts"><button class="btn ghost sm" data-dl="${esc(t.code)}">Download ticket</button></div>`)).join("")+`<div class="acts"><button class="btn" id="again">Book another journey</button></div>`;
+ $("again").onclick=()=>{document.querySelector(".hero").classList.remove("hide");ui.trip=null;b.classList.add("hide");$("bk1").classList.remove("hide");drawBook();window.scrollTo({top:0,behavior:"smooth"})};
+ b.onclick=e=>{const c=e.target.closest("[data-dl]");if(c){const t=list.find(x=>x.code===c.dataset.dl);saveText(t.code+".txt",ticketText(t))}};window.scrollTo({top:0,behavior:"smooth"})}
+/* ================= my trips ================= */
+async function findMy(){const p=$("mPhone").value.trim(),c=$("mCode").value.trim().toUpperCase();
+ if(!/^[6-9]\d{9}$/.test(p)){$("myList").innerHTML='<div class="banner">Enter the 10-digit mobile number used for the booking.</div>';return}
+ ui.my={p,c};drawMy()}
+function drawMy(){if(!ui.my)return;const {p,c}=ui.my;
+ const l=Object.values(S.tickets).filter(t=>t.phone===p&&(!c||t.code===c)).sort((a,b)=>new Date(b.date+"T"+b.time)-new Date(a.date+"T"+a.time));
+ if(!l.length){$("myList").innerHTML='<div class="card empty"><b>No tickets found</b>Check the mobile number'+(c?" and ticket code":"")+'.</div>';return}
+ $("myList").innerHTML=l.map(t=>{const up=t.status==="CONFIRMED"&&new Date(t.date+"T"+t.time+":00")>new Date();
+  return ticketCard(t,`<div class="acts"><button class="btn ghost sm" data-dl="${esc(t.code)}">Download</button>${up?`<button class="btn danger sm" data-cx="${esc(t.code)}">Cancel ticket</button>`:""}</div>`)}).join("")}
+const refundPct=h=>h>=24?90:h>=2?50:0;
+async function cancelTicket(code){try{const t=await store.getTicket(code);if(!t)return toast("Ticket not found.","err");
+ if(t.status!=="CONFIRMED")return toast("This ticket is already cancelled.","err");
+ const h=(new Date(t.date+"T"+t.time+":00")-new Date())/36e5;if(h<=0)return toast("This bus has already departed.","err");
+ const pc=refundPct(h),ref=Math.round(t.fare*pc)/100;
+ const ok=await confirmBox("Cancel this ticket?",`<p>${esc(t.from)} → ${esc(t.to)} · seat ${t.seat} · ${nice(t.date)} ${esc(t.time)}</p><p><b>Refund: ${pc}% = ${rs(ref)}</b> (${h>=24?"24 h or more":h>=2?"between 2 and 24 h":"under 2 h"} before departure)</p>`,"Yes, cancel",true);
+ if(!ok)return;await store.updTicket(code,{status:"CANCELLED",refund:ref,cancelledAt:Date.now()});await store.release(t.sch,t.seat);
+ toast(`Ticket ${code} cancelled. Refund ${rs(ref)}.`,"ok");drawMy()}catch(e){toast("Cancellation failed: "+(e&&e.message||"storage unavailable"),"err")}}
+/* ================= dashboard ================= */
+function bars(rows,fmt){const mx=Math.max(1,...rows.map(r=>r[1]));return rows.length?rows.map(r=>`<div class="bar2"><span class="n" title="${esc(r[0])}">${esc(r[0])}</span><span class="tr"><i style="width:${Math.max(2,r[1]/mx*100)}%"></i></span><em>${fmt(r[1])}</em></div>`).join(""):'<div class="hint">No data yet.</div>'}
+function drawDash(){const T=Object.values(S.tickets),ok=T.filter(t=>t.status==="CONFIRMED"),can=T.length-ok.length,rev=T.reduce((a,t)=>a+t.fare-(t.refund||0),0);
+ const R=allRoutes(),st=routeStats(),rr=R.map(r=>[r,st[r.id]||{n:0,c:0,rev:0}]).filter(x=>x[1].n+x[1].c>0).sort((a,b)=>b[1].rev-a[1].rev);
+ const up=trips().filter(t=>t.dep-new Date()<7*864e5),live=up.filter(t=>bookedN(t.id)>0),cap=live.reduce((a,t)=>a+t.b.cap,0),bk=live.reduce((a,t)=>a+bookedN(t.id),0);
+ const byType={};ok.forEach(t=>{const k=TYPES[t.type]?TYPES[t.type][0]:t.type;byType[k]=(byType[k]||0)+1});
+ const days=[];for(let d=0;d<7;d++){const x=new Date();x.setDate(x.getDate()+d);days.push(ymd(x))}const perDay=days.map(d=>ok.filter(t=>t.date===d).length),mxd=Math.max(1,...perDay);
+ const full=up.filter(t=>bookedN(t.id)>0).sort((a,b)=>bookedN(b.id)/b.b.cap-bookedN(a.id)/a.b.cap).slice(0,8);
+ if(!T.length){$("dash").innerHTML=`<div class="card empty"><b>No bookings yet</b>The dashboard fills up as passengers book.<div class="acts" style="justify-content:center"><button class="btn" id="goBook">Make a booking</button>${isAdmin?'<button class="btn ghost" id="goSeed">Add sample data</button>':""}</div></div>`;
+  $("goBook").onclick=()=>setTab("book");const g=$("goSeed");if(g)g.onclick=()=>{setTab("admin")};return}
+ $("dash").innerHTML=`<div class="kpis"><div class="kpi"><span>TICKETS SOLD</span><b>${ok.length}</b><em>${can} cancelled (${(100*can/T.length).toFixed(1)}%)</em></div>
+ <div class="kpi"><span>NET REVENUE</span><b>${rs(rev)}</b><em>incl. cancellation fees</em></div>
+ <div class="kpi"><span>TOP ROUTE</span><b style="font-size:17px">${rr[0]?esc(rlabel(rr[0][0])):"–"}</b><em>${rr[0]?rr[0][1].n+" tickets":""}</em></div>
+ <div class="kpi"><span>AVERAGE SEAT OCCUPANCY</span><b>${cap?(100*bk/cap).toFixed(1):0}%</b><em>${bk.toLocaleString("en-IN")} of ${cap.toLocaleString("en-IN")} seats on ${live.length} booked buses</em></div></div>
+ <div class="dgrid"><div class="card"><h3>Passenger demand across Tamil Nadu</h3><div id="map2"></div><p class="hint" style="margin:6px 0 0">Thicker lines and bigger dots mean more tickets.</p></div>
+ <div><div class="card"><h3>Route-wise revenue</h3>${bars(rr.slice(0,8).map(x=>[rlabel(x[0]),x[1].rev]),rs)}</div>
+ <div class="card"><h3>Seat occupancy: fullest upcoming buses</h3>${bars(full.map(t=>[t.from+" → "+t.to+" "+t.date.slice(5)+" "+t.time,100*bookedN(t.id)/t.b.cap]),x=>x.toFixed(0)+"%")}</div>
+ <div class="card"><h3>Tickets by travel day</h3><div class="cols">${perDay.map((n,i)=>`<div class="col"><b>${n}</b><i style="height:${Math.max(2,n/mxd*90)}%"></i>${DOW[new Date(days[i]+"T00:00:00").getDay()]}</div>`).join("")}</div></div>
+ <div class="card"><h3>Tickets by bus type</h3>${bars(Object.entries(byType).sort((a,b)=>b[1]-a[1]),x=>x)}</div></div></div>
+ <div class="card"><h3>Latest bookings</h3><div class="scroll"><table><tr><th>Ticket</th><th>Passenger</th><th>Route</th><th>Travel</th><th>Seat</th><th>Status</th><th>Fare</th></tr>${T.slice().sort((a,b)=>b.ts-a.ts).slice(0,12).map(t=>`<tr><td>${esc(t.code)}</td><td>${esc(maskName(t.name))}</td><td>${esc(t.from)} → ${esc(t.to)}</td><td>${t.date} ${t.time}</td><td>${t.seat}</td><td><span class="st ${t.status==="CANCELLED"?"bad":"ok"}">${t.status==="CANCELLED"?"Cancelled":"Confirmed"}</span></td><td>${rs(t.fare)}</td></tr>`).join("")}</table></div></div>`;
+ $("map2").innerHTML=mapSVG("demand")}
+/* ================= admin ================= */
+function drawAdmin(){const B=allBuses(),R=allRoutes();
+ $("aBusType").innerHTML=Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
+ const o=a=>a.map(c=>`<option>${esc(c)}</option>`).join("");const ka=$("aRa").value,kb=$("aRb").value;$("aRa").innerHTML=o(CITIES);$("aRb").innerHTML=o(CITIES);if(ka)$("aRa").value=ka;if(kb)$("aRb").value=kb;
+ const sb=$("aSBus").value,sr=$("aSRoute").value;$("aSBus").innerHTML=B.map(b=>`<option value="${b.id}">${esc(b.no)} · ${TYPES[b.type][0]} · ${b.cap} seats</option>`).join("");
+ $("aSRoute").innerHTML=R.flatMap(r=>[[r.id+"|f",r.a+" → "+r.b],[r.id+"|r",r.b+" → "+r.a]]).map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join("");
+ if(sb)$("aSBus").value=sb;if(sr)$("aSRoute").value=sr;
+ $("netInfo").innerHTML=`${B.length} buses · ${R.length} routes · ${CITIES.length} cities · ${trips().length} scheduled buses in the next 7 days · storage: <b>${mode==="shared"?"shared live database":"this browser tab only (demo)"}</b>`}
+const title=s=>s.trim().replace(/\s+/g," ").split(" ").map(w=>w[0].toUpperCase()+w.slice(1).toLowerCase()).join(" ");
+async function adm(fn){try{await fn()}catch(e){toast(e.message||"Failed","err")}}
+function wireAdmin(){
+ $("aBusBtn").onclick=()=>adm(async()=>{const no=$("aBusNo").value.trim().toUpperCase(),cap=+$("aBusCap").value;
+  if(!/^[A-Z0-9][A-Z0-9-]{4,19}$/.test(no))throw Error("Invalid bus number (5–20 letters, digits or hyphens).");if(!(cap>=1&&cap<=80))throw Error("Seats must be between 1 and 80.");
+  if(allBuses().some(b=>b.no===no))throw Error("A bus with this number already exists.");
+  await store.add("buses",{id:"B"+Date.now(),no,cap,type:$("aBusType").value});toast("Bus added.","ok");$("aBusNo").value=""});
+ $("aRouteBtn").onclick=()=>adm(async()=>{const a=$("aRa").value,b=$("aRb").value,km=+$("aKm").value;
+  if(a===b)throw Error("Choose two different cities.");if(!(km>0&&km<=2000))throw Error("Distance must be 1–2000 km.");if(routeBetween(a,b))throw Error("These cities are already connected.");
+  await store.add("routes",{id:"RX"+Date.now(),a,b,km,freq:1});toast("Route added. Daily services created in both directions.","ok")});
+ $("aSchBtn").onclick=()=>adm(async()=>{const bus=$("aSBus").value,[rid,dir]=$("aSRoute").value.split("|"),date=$("aSDate").value,time=$("aSTime").value,fare=+$("aSFare").value;
+  if(!date||!time)throw Error("Choose a date and departure time.");if(!(fare>0))throw Error("Fare must be positive.");
+  if(new Date(date+"T"+time+":00")<=new Date())throw Error("Cannot schedule a bus in the past.");
+  if(trips().some(t=>t.bus===bus&&t.date===date&&t.time===time))throw Error("That bus already has a trip at this time.");
+  const r=allRoutes().find(x=>x.id===rid);
+  await store.add("schedules",{id:date.replace(/-/g,"")+"-"+rid+dir+"-"+time.replace(":","")+"-X"+Date.now(),bus,rid,from:dir==="f"?r.a:r.b,to:dir==="f"?r.b:r.a,date,time,fare});toast("Schedule added.","ok")});
+ $("seedBtn").onclick=()=>adm(seed);$("clearBtn").onclick=()=>adm(async()=>{
+  const l=Object.values(S.tickets).filter(t=>t.sample);if(!l.length)return toast("No sample bookings to remove.");
+  const ok=await confirmBox("Remove sample bookings?",`<p>${l.length} sample tickets will be deleted. Real bookings stay.</p>`,"Remove",true);if(!ok)return;
+  for(const t of l){if(t.status==="CONFIRMED")await store.release(t.sch,t.seat).catch(()=>{});await store.delTicket(t.code)}toast("Sample bookings removed.","ok")});
+ $("csvBtn").onclick=()=>{const T=Object.values(S.tickets);if(!T.length)return toast("No tickets to export yet.");
+  const cols=["code","from","to","date","time","bus","type","seat","fare","refund","status","name","phone"];
+  const csv=[cols.join(",")].concat(T.map(t=>cols.map(c=>'"'+String(t[c]==null?"":t[c]).replace(/"/g,'""')+'"').join(","))).join("\r\n");saveText("tickets.csv",csv,"text/csv")}}
+async function seed(){const FN=["Arun","Karthik","Divya","Suresh","Priya","Vignesh","Lakshmi","Manoj","Anitha","Ravi","Meena","Dinesh","Kavya","Harish","Swathi","Prakash","Janani","Gokul","Revathi","Bala"],LN=["Kumar","Raj","Selvam","Devi","Murugan","Pandian","Iyer","Nair","Ganesan","Rajan"];
+ const c=trips().filter(t=>t.dep-new Date()<3*864e5);if(!c.length)return toast("No upcoming buses to book.","err");
+ const score=t=>(t.r.km>300?3:t.r.km>150?2:1)*(t.r.freq||1)+Math.random();
+ const hot=c.slice().sort((x,y)=>score(y)-score(x)).slice(0,6),plan=[];
+ hot.forEach(t=>{const n=Math.min(26,Math.round(t.b.cap*(.5+.4*Math.random())));for(let i=0;i<n;i++)plan.push(t)});
+ for(let i=0;i<24;i++)plan.push(c[Math.floor(Math.random()*c.length)]);
+ toast("Adding "+plan.length+" sample bookings… this takes a few seconds.");let made=0;
+ for(const t of plan){const tk=IDX[t.id]||new Set();if(tk.size>=t.b.cap)continue;
+  let seat;do{seat=1+Math.floor(Math.random()*t.b.cap)}while(tk.has(seat));
+  const code="TKT"+Date.now().toString(36).toUpperCase().slice(-5)+Math.random().toString(36).slice(2,5).toUpperCase();
+  if(!(await store.claim(t.id,seat,{sch:t.id,seat,code})))continue;
+  const cancelled=Math.random()<.08,h=(t.dep-new Date())/36e5,ref=cancelled?Math.round(t.fare*refundPct(h))/100:0;
+  await store.putTicket(code,{code,sch:t.id,seat,name:FN[Math.floor(Math.random()*20)]+" "+LN[Math.floor(Math.random()*10)],phone:"9"+String(100000000+made*7919).slice(0,9),fare:t.fare,refund:ref,status:cancelled?"CANCELLED":"CONFIRMED",ts:Date.now()-Math.floor(Math.random()*864e5),from:t.from,to:t.to,date:t.date,time:t.time,bus:t.b.no,type:t.b.type,rid:t.rid,sample:true});
+  if(cancelled)await store.release(t.sch,seat);made++}
+ toast(made+" sample bookings added. Open the Dashboard.","ok")}
+/* ================= shell ================= */
+const TABS=[["book","Book a bus"],["trips","My trips"],["dash","Dashboard"],["admin","Admin"]];
+function drawNav(){$("nav").innerHTML=TABS.filter(t=>t[0]!=="admin"||isAdmin).map(t=>`<button data-tab="${t[0]}" class="${t[0]===ui.tab?"on":""}">${t[1]}</button>`).join("")}
+function setTab(k){ui.tab=k;TABS.forEach(t=>$("tab-"+(t[0]==="trips"?"trips":t[0])).classList.toggle("hide",t[0]!==k));drawNav();refresh();window.scrollTo({top:0})}
+function refresh(){switch(ui.tab){case"book":if(ui.trip&&!$("bk2").classList.contains("hide")){drawSeats()}else if(!$("bk1").classList.contains("hide")){drawBook()}else drawStats();break;
+ case"trips":drawMy();break;case"dash":drawDash();break;case"admin":drawAdmin();break}}
+function init(){
+ setSelectors();drawNav();drawBook();wireAdmin();drawAdmin();
+ $("nav").onclick=e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab)};
+ $("fFrom").onchange=()=>{ui.from=$("fFrom").value;if(ui.to&&ui.from&&!routeBetween(ui.from,ui.to))ui.to="";syncSelectors();drawBook()};
+ $("fTo").onchange=()=>{ui.to=$("fTo").value;if(ui.to&&ui.from&&!routeBetween(ui.from,ui.to)){toast("No direct bus between "+ui.from+" and "+ui.to+".");ui.from=""}syncSelectors();drawBook()};
+ $("swap").onclick=()=>{[ui.from,ui.to]=[ui.to,ui.from];syncSelectors();drawBook()};
+ $("sort").onchange=()=>{ui.sort=$("sort").value;drawResults()};
+ $("days").onclick=e=>{const b=e.target.closest("[data-day]");if(b){ui.day=b.dataset.day;drawDays();drawResults()}};
+ $("chips").onclick=e=>{const b=e.target.closest("[data-type]");if(b){ui.type=b.dataset.type;drawChips();drawResults()}};
+ $("results").onclick=e=>{const b=e.target.closest("[data-trip]");if(b&&!b.disabled)openTrip(b.dataset.trip)};
+ $("map1").onclick=e=>{const g=e.target.closest("[data-c]");if(g)cityClick(g.dataset.c)};
+ $("map1").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){const g=e.target.closest("[data-c]");if(g){e.preventDefault();cityClick(g.dataset.c)}}};
+ $("bk2").onclick=e=>{const s=e.target.closest("[data-s]");if(!s||s.disabled)return;const n=+s.dataset.s,i=ui.picks.indexOf(n);
+  if(i>=0)ui.picks.splice(i,1);else if(ui.picks.length>=MAXSEATS)return toast("You can book up to "+MAXSEATS+" seats at a time.");else ui.picks.push(n);drawSeats()};
+ $("mFind").onclick=findMy;["mPhone","mCode"].forEach(i=>$(i).onkeydown=e=>{if(e.key==="Enter")findMy()});
+ $("myList").onclick=e=>{const d=e.target.closest("[data-dl]"),c=e.target.closest("[data-cx]");
+  if(d){const t=S.tickets[d.dataset.dl];if(t)saveText(t.code+".txt",ticketText(t))}if(c)cancelTicket(c.dataset.cx)};
+ $("themeBtn").onclick=()=>{const dark=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()==="#0e131b",n=dark?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("tn-theme",n)}catch(e){}};
+ try{const t=localStorage.getItem("tn-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+ store=memStore(false);
+ setInterval(()=>{TRIPS=null;if(ui.tab==="book"&&!$("bk1").classList.contains("hide"))drawResults()},60000)}
+init();
+(async()=>{
+ try{const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+  if(db){store=await dbStore(db);mode="shared";isAdmin=user?user.canEdit():false;$("modePill").textContent="● Live · shared database"}
+  else throw 0}
+ catch(e){store=memStore(true);changed();$("modePill").textContent="Demo mode · saved in this browser";$("banner").innerHTML='<div class="banner">Demo mode: bookings are saved in this browser only (not shared with other visitors). Connect a shared database to go fully live.</div>'}
+ drawNav();if(!isAdmin&&ui.tab==="admin")setTab("book");refresh()})();
+</script>
+</body>
+</html>

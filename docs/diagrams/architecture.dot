@@ -1,0 +1,18 @@
+digraph ARCH {
+  graph [rankdir=LR, fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.4, ranksep=0.8];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, fillcolor="#edf2f7", color="#4a5568"];
+  edge  [fontname="Helvetica", fontsize=9, color="#4a5568"];
+  user [label="Booking clerk /\nAdmin", shape=ellipse, fillcolor="#fefcbf"];
+  analyst [label="Transport\nanalyst", shape=ellipse, fillcolor="#fefcbf"];
+  subgraph cluster_java { label="Java application (OOP, JDBC)"; style="rounded,dashed"; fontname="Helvetica";
+    ui [label="Console UI\nMain / DemoRunner"]; svc [label="Service layer\nBooking · MasterData · Report"];
+    dao [label="DAO layer\nCrudDao<T,ID>"]; }
+  subgraph cluster_db { label="DBMS (MariaDB / MySQL)"; style="rounded,dashed"; fontname="Helvetica";
+    tables [label="Tables\nbus · route · schedule\npassenger · booking · ticket", fillcolor="#c6f6d5"];
+    rules [label="Constraints · Triggers\nUNIQUE seat_lock · capacity trigger", fillcolor="#c6f6d5"];
+    views [label="Views\nv_booking_report\nv_route_revenue\nv_seat_occupancy", fillcolor="#c6f6d5"]; }
+  subgraph cluster_py { label="Python analytics"; style="rounded,dashed"; fontname="Helvetica";
+    pandas [label="pandas\nretrieve + preprocess", fillcolor="#fed7e2"]; viz [label="matplotlib / seaborn\ncharts + insights", fillcolor="#fed7e2"]; }
+  user -> ui; ui -> svc -> dao -> tables [label=" JDBC"]; rules -> tables [dir=none]; tables -> views;
+  views -> pandas [label=" PyMySQL"]; tables -> pandas; pandas -> viz; viz -> analyst [label=" PNG + report"];
+}

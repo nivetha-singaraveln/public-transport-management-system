@@ -1,0 +1,76 @@
++-----------------------------------------------------------+
+| test                                                      |
++-----------------------------------------------------------+
+| T1: book seat 1 and seat 2 on a 2-seat bus (must succeed) |
++-----------------------------------------------------------+
++--------------+-----------------+
+| seats_booked | seats_available |
++--------------+-----------------+
+|            2 |               0 |
++--------------+-----------------+
++------------------------------------------------------------+
+| test                                                       |
++------------------------------------------------------------+
+| T2: third booking beyond capacity (must FAIL: Bus is full) |
++------------------------------------------------------------+
+--------------
+INSERT INTO booking (schedule_id, passenger_id, seat_no) VALUES (@sch, 3, 1)
+--------------
+
+ERROR 1644 (45000) at line 17: Bus is full: booking exceeds capacity
++--------------------------------------------+
+| test                                       |
++--------------------------------------------+
+| T3: seat number above capacity (must FAIL) |
++--------------------------------------------+
+--------------
+INSERT INTO booking (schedule_id, passenger_id, seat_no) VALUES (@sch, 3, 7)
+--------------
+
+ERROR 1644 (45000) at line 20: Seat number exceeds bus capacity
++---------------------------------------------------+
+| test                                              |
++---------------------------------------------------+
+| T4: cancel seat 2, then re-book it (must succeed) |
++---------------------------------------------------+
++---------+-----------+-----------------+
+| seat_no | status    | cancel_time_set |
++---------+-----------+-----------------+
+|       1 | CONFIRMED |               0 |
+|       2 | CANCELLED |               1 |
++---------+-----------+-----------------+
++------------------------------------------------+
+| test                                           |
++------------------------------------------------+
+| T5: reactivate a cancelled booking (must FAIL) |
++------------------------------------------------+
+--------------
+UPDATE booking SET status='CONFIRMED' WHERE schedule_id=@sch AND status='CANCELLED'
+--------------
+
+ERROR 1644 (45000) at line 28: A cancelled booking cannot be reactivated
++----------------------------------------------------------------------------+
+| test                                                                       |
++----------------------------------------------------------------------------+
+| T6: invalid data - negative fare, duplicate route, bad age (all must FAIL) |
++----------------------------------------------------------------------------+
+--------------
+INSERT INTO schedule (bus_id, route_id, travel_date, departure_time, fare) VALUES (@bus, 1, '2026-12-30', '10:00:00', -5)
+--------------
+
+ERROR 4025 (23000) at line 31: CONSTRAINT `chk_fare` failed for `transport_db`.`schedule`
+--------------
+INSERT INTO route (source, destination, distance_km) VALUES ('Madurai', 'Chennai', 460)
+--------------
+
+ERROR 1062 (23000) at line 32: Duplicate entry 'Madurai-Chennai' for key 'uq_route'
+--------------
+INSERT INTO passenger (name, phone, age) VALUES ('X', '9999999999', 150)
+--------------
+
+ERROR 4025 (23000) at line 33: CONSTRAINT `chk_age` failed for `transport_db`.`passenger`
++----------------------------------+-------+
+| result                           | buses |
++----------------------------------+-------+
+| ROLLED BACK - database unchanged |    12 |
++----------------------------------+-------+

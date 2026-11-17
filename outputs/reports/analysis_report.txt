@@ -1,0 +1,50 @@
+================================================================
+DATA PREPROCESSING
+================================================================
+Retrieved 2 booking rows x 19 cols; 3 schedules
+[1] converted decimals to float and date columns to datetime
+[2] duplicate bookings found: 0 (booking_id is unique -> none dropped)
+[3] missing values: age=2 (100.0%), email=0 (0.0%)
+    age imputed with median (nan); e-mail kept as 'has_email' flag (not needed for analysis)
+[4] normalised place names (strip + Title Case) and built 'route' label
+[5] derived: revenue, is_cancelled, weekday, lead_days, time_slot, fare_per_km, completed
+[6] fare-per-km outliers (IQR rule, per bus type): 0 -> kept (fares are set by schedule, not errors)
+[7] validity: bookings made after travel date = 0; cancelled before booked = 0
+Clean data: 2 bookings (1 on completed trips), 3 schedules
+
+================================================================
+VISUALISATIONS
+================================================================
+   saved outputs/charts/01_bookings_by_route.png
+   saved outputs/charts/02_revenue_by_route.png
+   saved outputs/charts/03_occupancy_by_bus_type.png
+   saved outputs/charts/04_daily_trend.png
+   saved outputs/charts/05_route_weekday_heatmap.png
+   saved outputs/charts/06_cancellation_rate.png
+   saved outputs/charts/07_fare_vs_distance.png
+   saved outputs/charts/08_booking_lead_time.png
+   saved outputs/charts/09_occupancy_by_departure_hour.png
+   saved outputs/charts/10_correlation.png
+   saved outputs/charts/11_passenger_age.png
+
+================================================================
+KEY INSIGHTS
+================================================================
+Total bookings          : 2  (confirmed 1, cancelled 1 = 50.0%)
+Net revenue             : Rs. 175
+Highest-demand route    : Erode -> Salem (1 tickets)
+Top revenue route       : Erode -> Salem (Rs. 100, 57.1% of total)
+Best-filled route       : Erode -> Salem (2.5% avg occupancy)
+Lowest-demand route     : Erode -> Salem (1 tickets)
+Weakest-filled route    : Erode -> Coimbatore (0.0% avg occupancy) -> candidate for fewer trips
+Busiest weekday         : Wednesday (2.5%), quietest: Tuesday (0.0%)
+Occupancy by bus type   : NON_AC_SEATER 1.2%, DELUXE 0.0%
+Trips >=95% full        : 0 of 3  | trips <40% full: 3
+Highest cancellations   : Erode -> Coimbatore (100.0%)
+Median booking lead time: 1 days
+Correlation distance vs occupancy: -1.00
+
+Recommendations:
+  1. Add capacity on Erode -> Salem - it earns the most and sells the most tickets.
+  2. Review frequency on Erode -> Coimbatore where buses run emptiest.
+  3. Weekend trips (nan%) are not busier than Mon-Thu (0.8%): no weekend uplift needed.

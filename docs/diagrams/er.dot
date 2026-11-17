@@ -1,0 +1,64 @@
+digraph ER {
+  graph [rankdir=LR, fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.5, ranksep=0.9];
+  node  [shape=plaintext, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=10, color="#555555"];
+
+  bus [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#2b6cb0"><FONT COLOR="white"><B>BUS</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>bus_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT">bus_number (UNIQUE)</TD></TR>
+   <TR><TD ALIGN="LEFT">capacity (CHECK 1..80)</TD></TR>
+   <TR><TD ALIGN="LEFT">bus_type (ENUM)</TD></TR></TABLE>>];
+
+  route [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#2b6cb0"><FONT COLOR="white"><B>ROUTE</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>route_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT">source</TD></TR>
+   <TR><TD ALIGN="LEFT">destination</TD></TR>
+   <TR><TD ALIGN="LEFT">distance_km (CHECK &gt; 0)</TD></TR>
+   <TR><TD ALIGN="LEFT"><I>UNIQUE(source, destination)</I></TD></TR></TABLE>>];
+
+  schedule [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#2f855a"><FONT COLOR="white"><B>SCHEDULE</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>schedule_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="b">bus_id (FK)</TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="r">route_id (FK)</TD></TR>
+   <TR><TD ALIGN="LEFT">travel_date</TD></TR>
+   <TR><TD ALIGN="LEFT">departure_time</TD></TR>
+   <TR><TD ALIGN="LEFT">fare (CHECK &gt; 0)</TD></TR>
+   <TR><TD ALIGN="LEFT"><I>UNIQUE(bus, date, time)</I></TD></TR></TABLE>>];
+
+  passenger [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#2b6cb0"><FONT COLOR="white"><B>PASSENGER</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>passenger_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT">name</TD></TR>
+   <TR><TD ALIGN="LEFT">phone (UNIQUE)</TD></TR>
+   <TR><TD ALIGN="LEFT">email (NULL)</TD></TR>
+   <TR><TD ALIGN="LEFT">age (NULL, CHECK)</TD></TR></TABLE>>];
+
+  booking [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#c05621"><FONT COLOR="white"><B>BOOKING</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>booking_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="s">schedule_id (FK)</TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="p">passenger_id (FK)</TD></TR>
+   <TR><TD ALIGN="LEFT">seat_no</TD></TR>
+   <TR><TD ALIGN="LEFT">status (CONFIRMED/CANCELLED)</TD></TR>
+   <TR><TD ALIGN="LEFT">booked_at, cancelled_at</TD></TR>
+   <TR><TD ALIGN="LEFT"><I>seat_lock (generated)</I></TD></TR>
+   <TR><TD ALIGN="LEFT"><I>UNIQUE(schedule, seat, seat_lock)</I></TD></TR></TABLE>>];
+
+  ticket [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+   <TR><TD BGCOLOR="#c05621"><FONT COLOR="white"><B>TICKET</B></FONT></TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="pk"><U>ticket_id</U> (PK)</TD></TR>
+   <TR><TD ALIGN="LEFT" PORT="bk">booking_id (FK, UNIQUE)</TD></TR>
+   <TR><TD ALIGN="LEFT">ticket_code (UNIQUE)</TD></TR>
+   <TR><TD ALIGN="LEFT">fare_paid</TD></TR>
+   <TR><TD ALIGN="LEFT">refund_amount</TD></TR>
+   <TR><TD ALIGN="LEFT">issued_at</TD></TR></TABLE>>];
+
+  bus:pk      -> schedule:b  [label="1 : N  runs", arrowhead=crow, arrowtail=tee, dir=both];
+  route:pk    -> schedule:r  [label="1 : N  served by", arrowhead=crow, arrowtail=tee, dir=both];
+  schedule:pk -> booking:s   [label="1 : N  has", arrowhead=crow, arrowtail=tee, dir=both];
+  passenger:pk-> booking:p   [label="1 : N  makes", arrowhead=crow, arrowtail=tee, dir=both];
+  booking:pk  -> ticket:bk   [label="1 : 1  issues", arrowhead=tee, arrowtail=tee, dir=both];
+}

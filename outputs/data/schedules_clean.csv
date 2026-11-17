@@ -1,0 +1,4 @@
+schedule_id,bus_number,bus_type,source,destination,travel_date,departure_time,capacity,seats_booked,seats_available,occupancy_pct,route,weekday,completed,distance_km,fare
+1,TN33AB1234,NON_AC_SEATER,Erode,Coimbatore,2026-11-17,0 days 08:00:00,50.0,0.0,50,0.0,Erode -> Coimbatore,Tuesday,True,100.0,150.0
+2,TN33CD5678,NON_AC_SEATER,Erode,Salem,2026-11-18,0 days 09:00:00,40.0,1.0,39,2.5,Erode -> Salem,Wednesday,False,70.0,100.0
+3,TN33EF9012,DELUXE,Coimbatore,Chennai,2026-11-17,0 days 06:00:00,45.0,0.0,45,0.0,Coimbatore -> Chennai,Tuesday,True,,

@@ -1,0 +1,33 @@
+digraph UML {
+  graph [rankdir=BT, fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.35, ranksep=0.7];
+  node  [shape=record, fontname="Helvetica", fontsize=10, style=filled, fillcolor="#f7fafc"];
+  edge  [fontname="Helvetica", fontsize=9];
+
+  Entity [label="{«abstract»\nEntity|# id : int|+ describe() : String}"];
+  Bus [label="{Bus|- busNumber : String\l- capacity : int\l- type : BusType\l|+ describe()\l}"];
+  Route [label="{Route|- source, destination : String\l- distanceKm : double\l|+ describe()\l}"];
+  Schedule [label="{Schedule|- busId, routeId : int\l- travelDate : LocalDate\l- departureTime : LocalTime\l- fare : BigDecimal\l|+ departure() : LocalDateTime\l}"];
+  Passenger [label="{Passenger|- name, phone, email : String\l- age : Integer\l|+ describe()\l}"];
+  Bus -> Entity [arrowhead=empty]; Route -> Entity [arrowhead=empty];
+  Schedule -> Entity [arrowhead=empty]; Passenger -> Entity [arrowhead=empty];
+
+  CrudDao [label="{«interface»\nCrudDao\<T, ID\>|+ add(T) : T\l+ findById(ID) : Optional\<T\>\l+ findAll() : List\<T\>\l+ update(T) : boolean\l+ delete(ID) : boolean\l}", fillcolor="#ebf8ff"];
+  BusDao [label="BusDao"]; RouteDao [label="RouteDao"]; ScheduleDao [label="{ScheduleDao|+ search(...) : List\<ScheduleInfo\>\l+ info(id)\l}"]; PassengerDao [label="{PassengerDao|+ findByPhone(String)\l}"];
+  BookingDao [label="{BookingDao|+ find(...) : List\<BookingRow\>\l+ findByTicketCode(String)\l+ availableSeats(int)\l}"];
+  BusDao -> CrudDao [arrowhead=empty, style=dashed]; RouteDao -> CrudDao [arrowhead=empty, style=dashed];
+  ScheduleDao -> CrudDao [arrowhead=empty, style=dashed]; PassengerDao -> CrudDao [arrowhead=empty, style=dashed];
+
+  MasterDataService [label="{MasterDataService|+ addBus / addRoute / addSchedule\l+ registerPassenger\l|validates with Validator\l}", fillcolor="#f0fff4"];
+  BookingService [label="{BookingService|+ bookTicket(sch, pax, seat?) : BookingRow\l+ cancelTicket(id) : CancellationResult\l|transactional, row-locked\l}", fillcolor="#f0fff4"];
+  ReportService [label="{ReportService|+ bookingReport() / routeRevenueReport()\l+ occupancyReport() / topPassengers()\l|uses Streams + SQL views\l}", fillcolor="#f0fff4"];
+  ConcurrencyDemo [label="{ConcurrencyDemo|ExecutorService + CountDownLatch}", fillcolor="#f0fff4"];
+  Main [label="{Main / DemoRunner|console UI}", fillcolor="#fffaf0"];
+
+  MasterDataService -> BusDao; MasterDataService -> RouteDao; MasterDataService -> ScheduleDao; MasterDataService -> PassengerDao;
+  BookingService -> BookingDao; ReportService -> BookingDao; ConcurrencyDemo -> BookingService;
+  Main -> MasterDataService; Main -> BookingService; Main -> ReportService; Main -> ConcurrencyDemo;
+
+  TransportException [label="{TransportException|extends Exception}", fillcolor="#fff5f5"];
+  Sub [label="{SeatUnavailableException\lBusFullException\lBookingNotFoundException\lValidationException}", fillcolor="#fff5f5"];
+  Sub -> TransportException [arrowhead=empty];
+}

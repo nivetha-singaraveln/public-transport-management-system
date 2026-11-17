@@ -1,0 +1,118 @@
++-------------+----------+--------+-----------+
+| schedule_id | capacity | booked | available |
++-------------+----------+--------+-----------+
+|         206 |       40 |      8 |        32 |
++-------------+----------+--------+-----------+
++------+
+| seat |
++------+
+|    1 |
+|    2 |
+|    3 |
+|    4 |
+|    5 |
+|    6 |
+|    7 |
+|    8 |
+|    9 |
+|   11 |
++------+
++---------------------+------------+---------+----------+
+| name                | phone      | tickets | spent    |
++---------------------+------------+---------+----------+
+| Prakash Iyer        | 9510676483 |      30 | 16000.00 |
+| Meena Pandian       | 9169230743 |      29 | 12430.00 |
+| Revathi Subramanian | 9727687547 |      28 | 13945.00 |
+| Bala Lakshmi        | 9041403431 |      27 | 11725.00 |
+| Nivetha Subramanian | 9921318283 |      27 | 12235.00 |
++---------------------+------------+---------+----------+
++-----------------+-----------------+--------------+-------------------+-------------+
+| source          | destination     | tickets_sold | tickets_cancelled | net_revenue |
++-----------------+-----------------+--------------+-------------------+-------------+
+| Madurai         | Chennai         |          959 |                86 |   609807.00 |
+| Chennai         | Coimbatore      |          580 |                54 |   400588.00 |
+| Chennai         | Tiruchirappalli |          712 |                57 |   336881.00 |
+| Madurai         | Bengaluru       |          412 |                35 |   274643.00 |
+| Madurai         | Coimbatore      |          643 |                48 |   198723.00 |
+| Coimbatore      | Bengaluru       |          288 |                26 |   149789.00 |
+| Madurai         | Rameswaram      |          418 |                43 |   109015.00 |
+| Tiruchirappalli | Coimbatore      |          349 |                31 |   101971.00 |
+| Madurai         | Tiruchirappalli |          536 |                47 |    96793.00 |
+| Madurai         | Tirunelveli     |          428 |                48 |    95631.00 |
++-----------------+-----------------+--------------+-------------------+-------------+
++-------------+---------+-----------------+-------------+----------+--------------+---------------+
+| schedule_id | source  | destination     | travel_date | capacity | seats_booked | occupancy_pct |
++-------------+---------+-----------------+-------------+----------+--------------+---------------+
+|         117 | Madurai | Coimbatore      | 2026-11-02  |       36 |           36 |         100.0 |
+|          75 | Chennai | Coimbatore      | 2026-10-25  |       36 |           35 |          97.2 |
+|         104 | Madurai | Chennai         | 2026-10-31  |       36 |           35 |          97.2 |
+|         149 | Chennai | Tiruchirappalli | 2026-11-07  |       30 |           29 |          96.7 |
+|         172 | Madurai | Tirunelveli     | 2026-11-10  |       30 |           29 |          96.7 |
+|          66 | Madurai | Coimbatore      | 2026-10-24  |       50 |           48 |          96.0 |
+|         185 | Madurai | Chennai         | 2026-11-13  |       50 |           48 |          96.0 |
+|          40 | Chennai | Tiruchirappalli | 2026-10-20  |       36 |           34 |          94.4 |
+|          99 | Madurai | Chennai         | 2026-10-30  |       36 |           34 |          94.4 |
+|         101 | Madurai | Tiruchirappalli | 2026-10-30  |       36 |           34 |          94.4 |
++-------------+---------+-----------------+-------------+----------+--------------+---------------+
++---------+-----------------+-------------+
+| source  | destination     | net_revenue |
++---------+-----------------+-------------+
+| Madurai | Chennai         |   609807.00 |
+| Chennai | Coimbatore      |   400588.00 |
+| Chennai | Tiruchirappalli |   336881.00 |
+| Madurai | Bengaluru       |   274643.00 |
++---------+-----------------+-------------+
++---------------+-------------------------------+---------+-----+
+| bus_type      | route                         | tickets | rnk |
++---------------+-------------------------------+---------+-----+
+| AC_SLEEPER    | Madurai -> Bengaluru          |     135 |   1 |
+| AC_SLEEPER    | Chennai -> Tiruchirappalli    |     115 |   2 |
+| AC_SLEEPER    | Madurai -> Coimbatore         |      85 |   3 |
+| AC_SLEEPER    | Madurai -> Rameswaram         |      72 |   4 |
+| AC_SLEEPER    | Madurai -> Chennai            |      64 |   5 |
+| AC_SLEEPER    | Madurai -> Tirunelveli        |      59 |   6 |
+| AC_SLEEPER    | Chennai -> Coimbatore         |      28 |   7 |
+| AC_SLEEPER    | Madurai -> Tiruchirappalli    |      25 |   8 |
+| AC_SLEEPER    | Coimbatore -> Bengaluru       |       3 |   9 |
+| AC_SEATER     | Madurai -> Chennai            |     211 |   1 |
+| AC_SEATER     | Chennai -> Tiruchirappalli    |     170 |   2 |
+| AC_SEATER     | Madurai -> Coimbatore         |     169 |   3 |
+| AC_SEATER     | Madurai -> Tiruchirappalli    |     161 |   4 |
+| AC_SEATER     | Tiruchirappalli -> Coimbatore |     149 |   5 |
+| AC_SEATER     | Madurai -> Rameswaram         |     146 |   6 |
+| AC_SEATER     | Coimbatore -> Bengaluru       |     135 |   7 |
+| AC_SEATER     | Chennai -> Coimbatore         |     126 |   8 |
+| AC_SEATER     | Madurai -> Tirunelveli        |      70 |   9 |
+| AC_SEATER     | Madurai -> Bengaluru          |      50 |  10 |
+| NON_AC_SEATER | Madurai -> Chennai            |     272 |   1 |
+| NON_AC_SEATER | Chennai -> Tiruchirappalli    |     255 |   2 |
+| NON_AC_SEATER | Madurai -> Tiruchirappalli    |     229 |   3 |
+| NON_AC_SEATER | Madurai -> Coimbatore         |     223 |   4 |
+| NON_AC_SEATER | Madurai -> Tirunelveli        |     181 |   5 |
+| NON_AC_SEATER | Madurai -> Bengaluru          |     171 |   6 |
+| NON_AC_SEATER | Chennai -> Coimbatore         |     138 |   7 |
+| NON_AC_SEATER | Madurai -> Rameswaram         |     112 |   8 |
+| NON_AC_SEATER | Tiruchirappalli -> Coimbatore |      92 |   9 |
+| NON_AC_SEATER | Coimbatore -> Bengaluru       |      85 |  10 |
+| DELUXE        | Madurai -> Chennai            |     412 |   1 |
+| DELUXE        | Chennai -> Coimbatore         |     288 |   2 |
+| DELUXE        | Chennai -> Tiruchirappalli    |     172 |   3 |
+| DELUXE        | Madurai -> Coimbatore         |     166 |   4 |
+| DELUXE        | Madurai -> Tiruchirappalli    |     121 |   5 |
+| DELUXE        | Madurai -> Tirunelveli        |     118 |   6 |
+| DELUXE        | Tiruchirappalli -> Coimbatore |     108 |   7 |
+| DELUXE        | Madurai -> Rameswaram         |      88 |   8 |
+| DELUXE        | Coimbatore -> Bengaluru       |      65 |   9 |
+| DELUXE        | Madurai -> Bengaluru          |      56 |  10 |
++---------------+-------------------------------+---------+-----+
++-----------+---------+
+| weekday   | tickets |
++-----------+---------+
+| Monday    |     709 |
+| Tuesday   |     599 |
+| Wednesday |     432 |
+| Thursday  |     906 |
+| Friday    |     889 |
+| Saturday  |     916 |
+| Sunday    |     697 |
++-----------+---------+
